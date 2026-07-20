@@ -31,6 +31,7 @@ import { WidgetGrid } from './components/WidgetGrid';
 import { WidgetEditor } from './components/WidgetEditor';
 import { LinkDialog } from './components/LinkDialog';
 import { SettingsPanel } from './components/SettingsPanel';
+import { BackgroundPanel } from './components/BackgroundPanel';
 import { TopInfoWidgets } from './components/TopInfoWidgets';
 import { WidgetToolbar } from './components/WidgetToolbar';
 import { ConfirmDialog } from './components/ConfirmDialog';
@@ -61,6 +62,7 @@ export function App() {
   const [activeBoardId, setActiveBoardId] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [showBackground, setShowBackground] = useState(false);
   const [showWidgetToolbar, setShowWidgetToolbar] = useState(false);
   const [isAddingWidget, setIsAddingWidget] = useState(false);
   const [newWidgetColumn, setNewWidgetColumn] = useState(0);
@@ -427,6 +429,15 @@ export function App() {
             </button>
           <button
             className="app-fab-menu__item"
+            onClick={() => { setShowBackground(true); setMenuOpen(false); }}
+            aria-label="Background"
+            title="Background"
+          >
+            <Icon name="image" size={18} />
+            <span>Background</span>
+          </button>
+          <button
+            className="app-fab-menu__item"
             onClick={() => { setShowSettings(true); setMenuOpen(false); }}
             aria-label="Configurações"
             title="Configurações"
@@ -493,6 +504,14 @@ export function App() {
           link={editingLinkData.link}
           onSave={(title, url, icon) => handleUpdateLink(editingLinkData.widgetId, editingLinkData.link.id, title, url, icon)}
           onClose={() => setEditingLink(null)}
+        />
+      )}
+
+      {showBackground && (
+        <BackgroundPanel
+          settings={data.settings}
+          onChange={handleSettingsChange}
+          onClose={() => setShowBackground(false)}
         />
       )}
 
