@@ -62,8 +62,33 @@ export interface Board {
   updatedAt: number;
 }
 
+export interface ThemeConfig {
+  primaryColor: string;
+  boardColor: string;
+  boardOpacity: number;
+  boardBlur: number;
+  derivedFromWallpaper: boolean;
+}
+
+export const DEFAULT_THEME: ThemeConfig = {
+  primaryColor: '#4f46e5',
+  boardColor: '#ffffff',
+  boardOpacity: 0.78,
+  boardBlur: 16,
+  derivedFromWallpaper: true
+};
+
+export const DARK_THEME: ThemeConfig = {
+  primaryColor: '#818cf8',
+  boardColor: '#1e293b',
+  boardOpacity: 0.72,
+  boardBlur: 16,
+  derivedFromWallpaper: true
+};
+
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
+  themeConfig: ThemeConfig;
   wallpaper: WallpaperSetting;
   lastBoardId?: string;
   topWidgets?: TopWidgetConfig[];
@@ -162,6 +187,7 @@ export function getDefaultData(): AppData {
     boards: INITIAL_SAMPLE_BOARDS,
     settings: {
       theme: 'system',
+      themeConfig: DEFAULT_THEME,
       wallpaper: DEFAULT_WALLPAPERS[0],
       topWidgets: [
         { type: 'weather', city: 'New York' },

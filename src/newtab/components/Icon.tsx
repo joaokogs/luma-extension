@@ -69,7 +69,8 @@ export type IconName =
   | 'smartphone'
   | 'tablet'
   | 'monitor'
-  | 'globe-2';
+  | 'globe-2'
+  | 'palette';
 
 interface IconProps {
   name: IconName;
@@ -143,7 +144,8 @@ const ICONS: Record<IconName, string> = {
   smartphone: 'M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM12 18h.01',
   tablet: 'M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM12 18h.01',
   monitor: 'M22 3H2v14h20V3zm-9 14v3h4v2H7v-2h4v-3',
-  'globe-2': 'M2 12h20M12 2v20M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20zm0 20a10 10 0 0 0 0-20 10 10 0 0 0 0 20zm-9-9a10 10 0 0 0 18 0 10 10 0 0 0-18 0zm0-2a10 10 0 0 0 18 0 10 10 0 0 0-18 0z'
+  'globe-2': 'M2 12h20M12 2v20M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20zm0 20a10 10 0 0 0 0-20 10 10 0 0 0 0 20zm-9-9a10 10 0 0 0 18 0 10 10 0 0 0-18 0zm0-2a10 10 0 0 0 18 0 10 10 0 0 0-18 0z',
+  palette: 'M12 2a10 10 0 0 0 0 20 2 2 0 0 0 2-2v-.5a.5.5 0 0 1 .5-.5H14a4 4 0 0 0 4-4 6 6 0 0 1 2.9-5.1A9.94 9.94 0 0 0 12 2Zm-3 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-3a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-7 1a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm10-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z'
 };
 
 export function Icon({ name, size = 20, className = '' }: IconProps) {

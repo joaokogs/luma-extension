@@ -41,6 +41,8 @@ import { ConfirmDialog } from './components/ConfirmDialog';
 import { NewTabDialog } from './components/NewTabDialog';
 import { Icon } from './components/Icon';
 import { SearchBar } from './components/SearchBar';
+import { useThemeStore } from './store/useThemeStore';
+import { computeThemeVariables } from '@shared/colorExtractor';
 import './styles.css';
 
 function looksLikeUrl(str: string): boolean {
@@ -99,14 +101,29 @@ export function App() {
     }
   }, [activeBoardId]);
 
+  const themeConfig = useThemeStore((s) => s.themeConfig);
+  const themeMode = useThemeStore((s) => s.themeMode);
+  const setThemeMode = useThemeStore((s) => s.setThemeMode);
+
   useEffect(() => {
-    const theme = data?.settings.theme ?? 'system';
+    if (data?.settings.theme && data.settings.theme !== themeMode) {
+      setThemeMode(data.settings.theme);
+    }
+  }, [data?.settings.theme]);
+
+  useEffect(() => {
+    const theme = themeMode === 'system' ? (data?.settings.theme ?? 'system') : themeMode;
     const root = document.documentElement;
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark = theme === 'dark' || (theme === 'system' && systemDark);
     root.classList.toggle('theme-dark', isDark);
     root.classList.toggle('theme-light', !isDark);
-  }, [data?.settings.theme]);
+
+    const vars = computeThemeVariables(themeConfig, isDark);
+    Object.entries(vars).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+  }, [themeConfig, themeMode, data?.settings.theme]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -456,11 +473,11 @@ export function App() {
           <button
             className="app-fab-menu__item"
             onClick={() => { setShowBackground(true); setMenuOpen(false); }}
-            aria-label="Background"
-            title="Background"
+            aria-label="Personalizar aparência"
+            title="Personalizar aparência"
           >
-            <Icon name="image" size={18} />
-            <span>Background</span>
+            <Icon name="palette" size={18} />
+            <span>Aparência</span>
           </button>
           <button
             className="app-fab-menu__item"
