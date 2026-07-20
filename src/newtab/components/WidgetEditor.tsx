@@ -127,28 +127,32 @@ export function WidgetEditor({ widget, initialColumn = 0, onSave, onClose }: Wid
                 <option value={2}>2 colunas</option>
               </select>
             </label>
-            <label className="widget-editor__field widget-editor__field--small">
-              <span>Coluna</span>
-              <input
-                type="number"
-                value={col}
-                onChange={(e) => setCol(Math.max(Number((e.target as HTMLInputElement).value) || 0, 0))}
-                min={0}
-              />
-            </label>
-            <label className="widget-editor__field widget-editor__field--small">
-              <span>Altura (px)</span>
-              <input
-                type="number"
-                value={height}
-                onChange={(e) => {
-                  const val = (e.target as HTMLInputElement).value;
-                  setHeight(val === '' ? '' : Number(val));
-                }}
-                placeholder="Auto"
-                min={120}
-              />
-            </label>
+            {isEdit && (
+              <>
+                <label className="widget-editor__field widget-editor__field--small">
+                  <span>Coluna</span>
+                  <input
+                    type="number"
+                    value={col}
+                    onChange={(e) => setCol(Math.max(Number((e.target as HTMLInputElement).value) || 0, 0))}
+                    min={0}
+                  />
+                </label>
+                <label className="widget-editor__field widget-editor__field--small">
+                  <span>Altura (px)</span>
+                  <input
+                    type="number"
+                    value={height}
+                    onChange={(e) => {
+                      const val = (e.target as HTMLInputElement).value;
+                      setHeight(val === '' ? '' : Number(val));
+                    }}
+                    placeholder="Auto"
+                    min={120}
+                  />
+                </label>
+              </>
+            )}
           </div>
 
           {type === 'weather' && (

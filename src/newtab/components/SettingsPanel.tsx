@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from 'preact/hooks';
-import type { AppSettings, TopWidgetConfig, TopWidgetType, WallpaperSetting } from '@shared/types';
+import type { AppSettings, WallpaperSetting } from '@shared/types';
 import { DEFAULT_WALLPAPERS } from '@shared/types';
 import { Icon } from './Icon';
-import { CityAutocomplete } from './CityAutocomplete';
 
 interface SettingsPanelProps {
   settings: AppSettings;
@@ -17,7 +16,6 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport 
   const [customUrl, setCustomUrl] = useState(
     settings.wallpaper.type === 'url' ? settings.wallpaper.value : ''
   );
-  const [topWidgets, setTopWidgets] = useState<TopWidgetConfig[]>(settings.topWidgets || []);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,24 +36,6 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport 
 
   const isSelected = (wp: WallpaperSetting) =>
     settings.wallpaper.type === wp.type && settings.wallpaper.value === wp.value;
-
-  const updateTopWidget = (index: number, patch: Partial<TopWidgetConfig>) => {
-    const next = topWidgets.map((w, i) => (i === index ? { ...w, ...patch } : w));
-    setTopWidgets(next);
-    onChange({ topWidgets: next });
-  };
-
-  const addTopWidget = () => {
-    const next: TopWidgetConfig[] = [...topWidgets, { type: 'clock' }];
-    setTopWidgets(next);
-    onChange({ topWidgets: next });
-  };
-
-  const removeTopWidget = (index: number) => {
-    const next = topWidgets.filter((_, i) => i !== index);
-    setTopWidgets(next);
-    onChange({ topWidgets: next });
-  };
 
   return (
     <div className="settings-panel" ref={panelRef} role="dialog" aria-label="Configurações">
@@ -122,68 +102,6 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport 
           <button onClick={applyCustomWallpaper} aria-label="Aplicar wallpaper customizado">
             <Icon name="check" size={16} />
           </button>
-        </div>
-      </div>
-
-      <div className="settings-panel__section">
-        <div className="settings-panel__label-row">
-          <label className="settings-panel__label">Widgets do topo</label>
-          <button className="settings-panel__add" onClick={addTopWidget} aria-label="Adicionar widget do topo">
-            <Icon name="plus" size={14} />
-          </button>
-        </div>
-        <div className="top-widgets-list">
-          {topWidgets.map((w, i) => (
-            <div key={i} className="top-widgets-item">
-              <select
-                value={w.type}
-                onChange={(e) => updateTopWidget(i, { type: (e.target as HTMLSelectElement).value as TopWidgetType })}
-              >
-                <option value="weather">Clima</option>
-                <option value="focus">Foco</option>
-                <option value="clock">Relógio</option>
-              </select>
-              {w.type === 'weather' && (
-                <CityAutocomplete
-                  value={w.city || ''}
-                  onChange={(city) => updateTopWidget(i, { city })}
-                  placeholder="Cidade"
-                  id={`top-widget-city-${i}`}
-                />
-              )}
-              {w.type === 'clock' && (
-                <>
-                  <input
-                    type="text"
-                    placeholder="Timezone"
-                    value={w.timezone || ''}
-                    onChange={(e) => updateTopWidget(i, { timezone: (e.target as HTMLInputElement).value })}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Label"
-                    value={w.label || ''}
-                    onChange={(e) => updateTopWidget(i, { label: (e.target as HTMLInputElement).value })}
-                  />
-                </>
-              )}
-              {w.type === 'focus' && (
-                <input
-                  type="number"
-                  placeholder="Minutos meta"
-                  value={w.targetMinutes || 240}
-                  onChange={(e) => updateTopWidget(i, { targetMinutes: Number((e.target as HTMLInputElement).value) })}
-                />
-              )}
-              <button
-                className="top-widgets-item__remove"
-                onClick={() => removeTopWidget(i)}
-                aria-label="Remover widget do topo"
-              >
-                <Icon name="trash" size={14} />
-              </button>
-            </div>
-          ))}
         </div>
       </div>
 
