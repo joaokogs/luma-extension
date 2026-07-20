@@ -336,6 +336,54 @@ export function getWidgetsForBoard(data: AppData, boardId: string): Widget[] {
   return [...board.widgets].sort((a, b) => a.order - b.order);
 }
 
+export function moveLink(
+  data: AppData,
+  boardId: string,
+  fromWidgetId: string,
+  toWidgetId: string,
+  linkId: string,
+  toIndex: number
+): AppData {
+  return {
+    ...data,
+    boards: data.boards.map((b) => {
+      if (b.id !== boardId) return b;
+
+      let movedLink: LinkItem | undefined;
+      let originalIndex = -1;
+      let widgets = b.widgets.map((w) => {
+        if (w.id === fromWidgetId && w.type === 'links') {
+          const idx = w.items.findIndex((l) => l.id === linkId);
+          if (idx !== -1) {
+            originalIndex = idx;
+            movedLink = w.items[idx];
+            return { ...w, items: w.items.filter((l) => l.id !== linkId) };
+          }
+        }
+        return w;
+      });
+
+      if (movedLink) {
+        let adjustedIndex = toIndex;
+        if (fromWidgetId === toWidgetId && originalIndex < toIndex) {
+          adjustedIndex = toIndex - 1;
+        }
+        widgets = widgets.map((w) => {
+          if (w.id === toWidgetId && w.type === 'links') {
+            const items = [...w.items];
+            const clampedIndex = Math.min(adjustedIndex, items.length);
+            items.splice(clampedIndex, 0, movedLink!);
+            return { ...w, items };
+          }
+          return w;
+        });
+      }
+
+      return { ...b, widgets, updatedAt: Date.now() };
+    })
+  };
+}
+
 // Export / Import
 
 export function exportData(data: AppData): void {

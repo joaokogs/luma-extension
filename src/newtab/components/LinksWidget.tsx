@@ -5,21 +5,131 @@ import { getFaviconUrl } from '@shared/storage';
 import { AnyIcon } from './AnyIcon';
 import { Icon } from './Icon';
 
-interface LinksWidgetProps {
-  widget: LinksWidget;
-  onDeleteLink?: (linkId: string) => void;
-  onEditLink?: (linkId: string) => void;
+interface LinkDragState {
+  linkId: string | null;
+  fromWidgetId: string | null;
 }
 
-export function LinksWidgetView({ widget, onDeleteLink, onEditLink }: LinksWidgetProps) {
+interface LinksWidgetProps {
+  widget: LinksWidget;
+  linkDrag: LinkDragState;
+  onDeleteLink?: (linkId: string) => void;
+  onEditLink?: (linkId: string) => void;
+  onLinkDragStart?: (e: DragEvent, linkId: string) => void;
+  onLinkDragEnd?: () => void;
+  onLinkDrop?: (targetLinkId: string | null, position: 'before' | 'after') => void;
+}
+
+interface DropTarget {
+  linkId: string | null;
+  position: 'before' | 'after';
+}
+
+export function LinksWidgetView({
+  widget,
+  linkDrag,
+  onDeleteLink,
+  onEditLink,
+  onLinkDragStart,
+  onLinkDragEnd,
+  onLinkDrop
+}: LinksWidgetProps) {
+  const listRef = useRef<HTMLUListElement>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
+
+  useEffect(() => {
+    if (!linkDrag.linkId) {
+      setDropTarget(null);
+    }
+  }, [linkDrag.linkId]);
+
+  const getDropPosition = (clientY: number): DropTarget | null => {
+    if (!listRef.current) return null;
+    const items = listRef.current.querySelectorAll<HTMLLIElement>('.links-widget__item');
+
+    if (items.length === 0) {
+      return { linkId: null, position: 'before' };
+    }
+
+    const firstRect = items[0].getBoundingClientRect();
+    if (clientY <= firstRect.top) {
+      return { linkId: items[0].dataset.linkId || null, position: 'before' };
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const rect = items[i].getBoundingClientRect();
+      const nextTop = i < items.length - 1 ? items[i + 1].getBoundingClientRect().top : rect.bottom + 20;
+
+      if (clientY >= rect.top && clientY < nextTop) {
+        const linkId = items[i].dataset.linkId;
+        if (!linkId) continue;
+        const midY = rect.top + rect.height / 2;
+        return { linkId, position: clientY < midY ? 'before' : 'after' };
+      }
+    }
+
+    const last = items[items.length - 1];
+    return { linkId: last.dataset.linkId || null, position: 'after' };
+  };
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    if (!linkDrag.linkId) return;
+    const pos = getDropPosition(e.clientY);
+    if (pos) setDropTarget(pos);
+  };
+
+  const handleDragLeave = (e: DragEvent) => {
+    if (listRef.current && !listRef.current.contains(e.relatedTarget as Node)) {
+      setDropTarget(null);
+    }
+  };
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!onLinkDrop || !linkDrag.linkId) {
+      setDropTarget(null);
+      return;
+    }
+    const pos = getDropPosition(e.clientY);
+    if (pos) {
+      onLinkDrop(pos.linkId, pos.position);
+    }
+    setDropTarget(null);
+  };
+
+  const getItemDropClasses = (linkId: string): string => {
+    if (!dropTarget || !linkDrag.linkId) return '';
+    const classes = ['links-widget__item'];
+    if (dropTarget.linkId === linkId) {
+      if (dropTarget.position === 'before') classes.push('links-widget__item--drop-before');
+      if (dropTarget.position === 'after') classes.push('links-widget__item--drop-after');
+    }
+    return classes.join(' ');
+  };
+
   return (
-    <ul className="links-widget">
+    <ul
+      ref={listRef}
+      className="links-widget"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {widget.items.length === 0 && linkDrag.linkId && dropTarget && dropTarget.linkId === null && (
+        <li className="links-widget__drop-into" />
+      )}
       {widget.items.map((link) => (
         <LinkRow
           key={link.id}
           link={link}
+          className={getItemDropClasses(link.id)}
+          isDragging={linkDrag.linkId === link.id}
           onDelete={onDeleteLink}
           onEdit={onEditLink}
+          onDragStart={onLinkDragStart}
+          onDragEnd={onLinkDragEnd}
         />
       ))}
     </ul>
@@ -28,12 +138,20 @@ export function LinksWidgetView({ widget, onDeleteLink, onEditLink }: LinksWidge
 
 function LinkRow({
   link,
+  className,
+  isDragging,
   onDelete,
-  onEdit
+  onEdit,
+  onDragStart,
+  onDragEnd
 }: {
   link: LinkItem;
+  className?: string;
+  isDragging?: boolean;
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
+  onDragStart?: (e: DragEvent, linkId: string) => void;
+  onDragEnd?: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -90,8 +208,25 @@ function LinkRow({
     fn?.(link.id);
   };
 
+  const handleDragStart = (e: DragEvent) => {
+    if (!onDragStart) return;
+    e.stopPropagation();
+    onDragStart(e, link.id);
+  };
+
+  const handleDragEnd = () => {
+    onDragEnd?.();
+  };
+
   return (
-    <li className="links-widget__item" onContextMenu={handleContextMenu}>
+    <li
+      className={`${className || 'links-widget__item'}${isDragging ? ' links-widget__item--dragging' : ''}`}
+      data-link-id={link.id}
+      draggable={!!onDragStart}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onContextMenu={handleContextMenu}
+    >
       <a
         href={link.url}
         target="_blank"
@@ -99,6 +234,9 @@ function LinkRow({
         className="links-widget__link"
         aria-label={`Abrir ${link.title}`}
       >
+        <span className="links-widget__drag-handle" aria-hidden="true">
+          <Icon name="grip-vertical" size={12} />
+        </span>
         <span className="links-widget__icon">
           {link.icon ? (
             <AnyIcon name={link.icon} size={16} />

@@ -19,6 +19,7 @@ interface WidgetGridProps {
   onAddLink?: (widget: Widget) => void;
   onResizeWidget?: (widgetId: string, height: number) => void;
   onAddWidget?: (column: number) => void;
+  onMoveLink?: (fromWidgetId: string, toWidgetId: string, linkId: string, toIndex: number) => void;
   isEditing?: boolean;
 }
 
@@ -27,6 +28,11 @@ interface DragTarget {
   col: number | null;
   targetId: string | null;
   position: 'before' | 'after' | 'into' | null;
+}
+
+interface LinkDragState {
+  linkId: string | null;
+  fromWidgetId: string | null;
 }
 
 export function WidgetGrid({
@@ -39,11 +45,13 @@ export function WidgetGrid({
   onAddLink,
   onResizeWidget,
   onAddWidget,
+  onMoveLink,
   isEditing = true
 }: WidgetGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const columnCount = useColumnCount(gridRef);
   const [drag, setDrag] = useState<DragTarget>({ widgetId: null, col: null, targetId: null, position: null });
+  const [linkDrag, setLinkDrag] = useState<LinkDragState>({ linkId: null, fromWidgetId: null });
 
   const columns = useMemo(() => {
     const cols: Widget[][] = Array.from({ length: columnCount }, () => []);
@@ -131,7 +139,6 @@ export function WidgetGrid({
     commitReorder((byCol) => {
       const moved = byCol.flat().find((w) => w.id === drag.widgetId);
       if (!moved) return;
-      // remove from source column
       for (const col of byCol) {
         const idx = col.findIndex((w) => w.id === drag.widgetId);
         if (idx !== -1) { col.splice(idx, 1); break; }
@@ -176,6 +183,46 @@ export function WidgetGrid({
     setDrag({ widgetId: null, col: null, targetId: null, position: null });
   };
 
+  const handleLinkDragStart = (e: DragEvent, linkId: string, widgetId: string) => {
+    e.dataTransfer?.setData('text/plain', JSON.stringify({ linkId, widgetId }));
+    e.dataTransfer?.setDragImage(new Image(), 0, 0);
+    setLinkDrag({ linkId, fromWidgetId: widgetId });
+  };
+
+  const handleLinkDragEnd = () => {
+    setLinkDrag({ linkId: null, fromWidgetId: null });
+  };
+
+  const handleLinkDrop = (targetWidgetId: string, targetLinkId: string | null, position: 'before' | 'after') => {
+    if (!linkDrag.linkId || !linkDrag.fromWidgetId) {
+      setLinkDrag({ linkId: null, fromWidgetId: null });
+      return;
+    }
+
+    if (!onMoveLink) {
+      setLinkDrag({ linkId: null, fromWidgetId: null });
+      return;
+    }
+
+    const targetWidget = widgets.find((w) => w.id === targetWidgetId);
+    if (!targetWidget || targetWidget.type !== 'links') {
+      setLinkDrag({ linkId: null, fromWidgetId: null });
+      return;
+    }
+
+    const targetItems = targetWidget.items;
+    let toIndex: number;
+    if (targetLinkId) {
+      const idx = targetItems.findIndex((l) => l.id === targetLinkId);
+      toIndex = position === 'after' ? idx + 1 : idx;
+    } else {
+      toIndex = position === 'after' ? targetItems.length : 0;
+    }
+
+    onMoveLink(linkDrag.fromWidgetId, targetWidgetId, linkDrag.linkId, toIndex);
+    setLinkDrag({ linkId: null, fromWidgetId: null });
+  };
+
   return (
     <div className="widgets-grid" ref={gridRef}>
       {columns.map((colWidgets, colIndex) => (
@@ -205,8 +252,12 @@ export function WidgetGrid({
                 >
                   <WidgetContent
                     widget={widget}
+                    linkDrag={linkDrag}
                     onDeleteLink={(linkId) => onDeleteLink(widget.id, linkId)}
                     onEditLink={onEditLink ? (linkId) => onEditLink(widget.id, linkId) : undefined}
+                    onLinkDragStart={isEditing ? (e, linkId) => handleLinkDragStart(e, linkId, widget.id) : undefined}
+                    onLinkDragEnd={isEditing ? handleLinkDragEnd : undefined}
+                    onLinkDrop={isEditing ? (targetLinkId, position) => handleLinkDrop(widget.id, targetLinkId, position) : undefined}
                   />
                 </WidgetCard>
                 {isTarget && drag.position === 'after' && <DropIndicator />}
@@ -233,10 +284,36 @@ function DropIndicator() {
   return <div className="drop-indicator" />;
 }
 
-function WidgetContent({ widget, onDeleteLink, onEditLink }: { widget: Widget; onDeleteLink?: (linkId: string) => void; onEditLink?: (linkId: string) => void }) {
+function WidgetContent({
+  widget,
+  linkDrag,
+  onDeleteLink,
+  onEditLink,
+  onLinkDragStart,
+  onLinkDragEnd,
+  onLinkDrop
+}: {
+  widget: Widget;
+  linkDrag: LinkDragState;
+  onDeleteLink?: (linkId: string) => void;
+  onEditLink?: (linkId: string) => void;
+  onLinkDragStart?: (e: DragEvent, linkId: string) => void;
+  onLinkDragEnd?: () => void;
+  onLinkDrop?: (targetLinkId: string | null, position: 'before' | 'after') => void;
+}) {
   switch (widget.type) {
     case 'links':
-      return <LinksWidgetView widget={widget} onDeleteLink={onDeleteLink} onEditLink={onEditLink} />;
+      return (
+        <LinksWidgetView
+          widget={widget}
+          linkDrag={linkDrag}
+          onDeleteLink={onDeleteLink}
+          onEditLink={onEditLink}
+          onLinkDragStart={onLinkDragStart}
+          onLinkDragEnd={onLinkDragEnd}
+          onLinkDrop={onLinkDrop}
+        />
+      );
     case 'calendar':
       return <CalendarWidgetView />;
     case 'pomodoro':

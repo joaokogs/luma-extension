@@ -14,6 +14,7 @@ import {
   createLink,
   deleteLink,
   updateLink,
+  moveLink,
   updateSettings,
   getBoardById,
   getInitialBoardId,
@@ -214,6 +215,11 @@ export function App() {
         ? updateWidget(prev, activeBoardId, widgetId, { height })
         : prev
     );
+  };
+
+  const handleMoveLink = (fromWidgetId: string, toWidgetId: string, linkId: string, toIndex: number) => {
+    if (!activeBoardId) return;
+    setData((prev) => (prev && activeBoardId ? moveLink(prev, activeBoardId, fromWidgetId, toWidgetId, linkId, toIndex) : prev));
   };
 
   const handleDeleteLink = (widgetId: string, linkId: string) => {
@@ -431,6 +437,7 @@ export function App() {
             onAddLink={setAddingLinkWidget}
             onResizeWidget={handleResizeWidget}
             onAddWidget={handleStartAddWidget}
+            onMoveLink={handleMoveLink}
             isEditing={!searchQuery.trim()}
           />
         )}
