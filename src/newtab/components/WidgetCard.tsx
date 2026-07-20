@@ -133,59 +133,61 @@ export function WidgetCard({
       data-col-span={widget.colSpan}
       style={widget.height ? { height: widget.height, flexShrink: 0 } : undefined}
     >
-      <div className="widget-card__header">
-        <div className="widget-card__title-row">
-          <h3 className="widget-card__title">{widget.title}</h3>
-        </div>
-        {(onEdit || onDelete || onAddLink) && (
-          <div className="widget-card__actions">
-            <button
-              ref={kebabRef}
-              className="widget-card__kebab"
-              onClick={handleKebabClick}
-              aria-label="Ações do widget"
-              title="Ações"
-            >
-              <Icon name="more-vertical" size={16} />
-            </button>
-            {menuOpen && createPortal(
-              <div
-                ref={menuRef}
-                className="widget-card__menu"
-                style={{ position: 'fixed', top: menuPos.top, right: menuPos.right }}
+      <div className={`widget-card__header ${widget.type !== 'links' ? 'widget-card__header--actions-only' : ''}`}>
+          {widget.type === 'links' && (
+            <div className="widget-card__title-row">
+            <h3 className="widget-card__title">{widget.title}</h3>
+            </div>
+          )}
+          {(onEdit || onDelete || onAddLink) && (
+            <div className="widget-card__actions">
+              <button
+                ref={kebabRef}
+                className="widget-card__kebab"
+                onClick={handleKebabClick}
+                aria-label="Ações do widget"
+                title="Ações"
               >
-                {onAddLink && (
-                  <button
-                    className="widget-card__menu-item"
-                    onClick={handleAction(onAddLink)}
-                  >
-                    <Icon name="plus" size={14} />
-                    Adicionar link
-                  </button>
-                )}
-                {onEdit && (
-                  <button
-                    className="widget-card__menu-item"
-                    onClick={handleAction(onEdit)}
-                  >
-                    <Icon name="edit" size={14} />
-                    Editar
-                  </button>
-                )}
-                {onDelete && (
-                  <button
-                    className="widget-card__menu-item widget-card__menu-item--danger"
-                    onClick={handleAction(onDelete)}
-                  >
-                    <Icon name="trash" size={14} />
-                    Excluir
-                  </button>
-                )}
-              </div>,
-              document.body
-            )}
-          </div>
-        )}
+                <Icon name="more-vertical" size={16} />
+              </button>
+              {menuOpen && createPortal(
+                <div
+                  ref={menuRef}
+                  className="widget-card__menu"
+                  style={{ position: 'fixed', top: menuPos.top, right: menuPos.right }}
+                >
+                  {onAddLink && (
+                    <button
+                      className="widget-card__menu-item"
+                      onClick={handleAction(onAddLink)}
+                    >
+                      <Icon name="plus" size={14} />
+                      Adicionar link
+                    </button>
+                  )}
+                  {onEdit && (
+                    <button
+                      className="widget-card__menu-item"
+                      onClick={handleAction(onEdit)}
+                    >
+                      <Icon name="edit" size={14} />
+                      Editar
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      className="widget-card__menu-item widget-card__menu-item--danger"
+                      onClick={handleAction(onDelete)}
+                    >
+                      <Icon name="trash" size={14} />
+                      Excluir
+                    </button>
+                  )}
+                </div>,
+                document.body
+              )}
+            </div>
+          )}
       </div>
       <div className="widget-card__content">{children}</div>
       {onResize && (

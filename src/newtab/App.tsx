@@ -316,7 +316,7 @@ export function App() {
 
   const handleAddWidgetFromToolbar = (type: WidgetType) => {
     if (!activeBoardId) return;
-    const widget = createWidget(type, type);
+    const widget = createWidget(type, '');
     setData((prev) => (prev && activeBoardId ? addWidget(prev, activeBoardId, widget) : prev));
   };
 
@@ -490,6 +490,7 @@ export function App() {
       {isAddingWidget && (
         <WidgetEditor
           initialColumn={newWidgetColumn}
+          linksOnly
           onSave={handleAddWidget}
           onClose={() => setIsAddingWidget(false)}
         />

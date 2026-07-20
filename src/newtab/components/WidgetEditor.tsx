@@ -16,11 +16,12 @@ const WIDGET_TYPES: { type: WidgetType; label: string; icon: IconName }[] = [
 interface WidgetEditorProps {
   widget?: Widget | null;
   initialColumn?: number;
+  linksOnly?: boolean;
   onSave: (widget: Widget) => void;
   onClose: () => void;
 }
 
-export function WidgetEditor({ widget, initialColumn = 0, onSave, onClose }: WidgetEditorProps) {
+export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onSave, onClose }: WidgetEditorProps) {
   const isEdit = !!widget;
   const [type, setType] = useState<WidgetType>(widget?.type || 'links');
   const [title, setTitle] = useState(widget?.title || '');
@@ -84,14 +85,14 @@ export function WidgetEditor({ widget, initialColumn = 0, onSave, onClose }: Wid
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog" aria-modal="true">
       <div className="modal modal--wide">
         <div className="modal__header">
-          <h2>{isEdit ? 'Editar widget' : 'Novo widget'}</h2>
+          <h2>{isEdit ? 'Editar widget' : linksOnly ? 'Novo bloco de links' : 'Novo widget'}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Fechar">
             <Icon name="close" size={18} />
           </button>
         </div>
 
         <div className="widget-editor">
-          {!isEdit && (
+          {!isEdit && !linksOnly && (
             <div className="widget-editor__section">
               <label className="widget-editor__label">Tipo</label>
               <div className="widget-editor__types">
@@ -111,22 +112,26 @@ export function WidgetEditor({ widget, initialColumn = 0, onSave, onClose }: Wid
           )}
 
           <div className="widget-editor__row">
-            <label className="widget-editor__field">
-              <span>Título</span>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
-                placeholder="Ex: Trabalho"
-              />
-            </label>
-            <label className="widget-editor__field widget-editor__field--small">
-              <span>Largura</span>
-              <select value={colSpan} onChange={(e) => setColSpan(Number((e.target as HTMLSelectElement).value))}>
-                <option value={1}>1 coluna</option>
-                <option value={2}>2 colunas</option>
-              </select>
-            </label>
+            {(linksOnly || (isEdit && type === 'links')) && (
+              <label className="widget-editor__field">
+                <span>Título</span>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+                  placeholder="Ex: Trabalho"
+                />
+              </label>
+            )}
+            {!linksOnly && (
+              <label className="widget-editor__field widget-editor__field--small">
+                <span>Largura</span>
+                <select value={colSpan} onChange={(e) => setColSpan(Number((e.target as HTMLSelectElement).value))}>
+                  <option value={1}>1 coluna</option>
+                  <option value={2}>2 colunas</option>
+                </select>
+              </label>
+            )}
             {isEdit && (
               <>
                 <label className="widget-editor__field widget-editor__field--small">

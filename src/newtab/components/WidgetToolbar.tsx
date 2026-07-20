@@ -1,26 +1,31 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { CalendarDays, Clock3, Cloud, Crosshair, Search, Timer, type LucideIcon } from 'lucide-preact';
 import type { WidgetType, TopWidgetConfig } from '@shared/types';
-import { Icon, type IconName } from './Icon';
 import { CityAutocomplete } from './CityAutocomplete';
 
 interface WidgetOption {
   type: WidgetType | 'board' | 'notes' | 'search';
   label: string;
-  icon: IconName;
+  icon: LucideIcon;
   hasToggle?: boolean;
   hasAdd?: boolean;
   hasCity?: boolean;
   requiresWidget?: WidgetType;
 }
 
-const WIDGET_OPTIONS: WidgetOption[] = [
-  { type: 'notes', label: 'Notes', icon: 'edit', hasAdd: true },
-  { type: 'calendar', label: 'Calendar', icon: 'grid', hasAdd: true },
-  { type: 'pomodoro', label: 'Pomodoro', icon: 'clock', hasAdd: true },
-  { type: 'clock', label: 'Clock', icon: 'clock', hasToggle: true },
-  { type: 'search', label: 'Search', icon: 'search', hasToggle: true },
-  { type: 'focus', label: 'Focus', icon: 'target', hasToggle: true, requiresWidget: 'pomodoro' },
-  { type: 'weather', label: 'Weather', icon: 'cloud-sun', hasToggle: true, hasCity: true }
+const BLOCK_WIDGETS: WidgetOption[] = [
+  { type: 'calendar', label: 'Calendar', icon: CalendarDays, hasAdd: true },
+  { type: 'pomodoro', label: 'Pomodoro', icon: Timer, hasAdd: true },
+  { type: 'clock', label: 'Clock', icon: Clock3, hasAdd: true },
+  { type: 'weather', label: 'Weather', icon: Cloud, hasAdd: true },
+  { type: 'focus', label: 'Focus', icon: Crosshair, hasAdd: true },
+];
+
+const HEADER_WIDGETS: WidgetOption[] = [
+  { type: 'clock', label: 'Clock', icon: Clock3, hasToggle: true },
+  { type: 'search', label: 'Search', icon: Search, hasToggle: true },
+  { type: 'focus', label: 'Focus', icon: Crosshair, hasToggle: true, requiresWidget: 'pomodoro' },
+  { type: 'weather', label: 'Weather', icon: Cloud, hasToggle: true, hasCity: true }
 ];
 
 interface WidgetToolbarProps {
@@ -64,10 +69,11 @@ export function WidgetToolbar({
     return topWidgets.some((w) => w.type === type);
   };
 
-  const filteredOptions = WIDGET_OPTIONS.filter((option) => {
-    if (option.requiresWidget) return boardWidgets.includes(option.requiresWidget);
-    return true;
-  });
+  const filterOptions = (options: WidgetOption[]) =>
+    options.filter((option) => {
+      if (option.requiresWidget) return boardWidgets.includes(option.requiresWidget);
+      return true;
+    });
 
   const handleApplyCity = () => {
     if (cityInput.trim()) {
@@ -81,8 +87,11 @@ export function WidgetToolbar({
         <h3>WIDGETS</h3>
       </div>
 
-      <div className="widget-toolbar__list">
-        {filteredOptions.map((option) => {
+      <div className="widget-toolbar__group">
+        <h4 className="widget-toolbar__group-title">Blocos</h4>
+        <div className="widget-toolbar__list">
+          {filterOptions(BLOCK_WIDGETS).map((option) => {
+          const WidgetIcon = option.icon;
           const isActive = option.type !== 'board' && option.type !== 'notes'
             ? isWidgetActive(option.type as WidgetType)
             : false;
@@ -90,7 +99,48 @@ export function WidgetToolbar({
           return (
             <div key={option.type} className="widget-toolbar__item">
               <div className="widget-toolbar__item-info">
-                <Icon name={option.icon} size={18} />
+                <WidgetIcon size={18} strokeWidth={2} />
+                <span>{option.label}</span>
+              </div>
+
+              {option.hasAdd && (
+                <button
+                  className="widget-toolbar__add-btn"
+                  onClick={() => onAddWidget(option.type as WidgetType)}
+                >
+                  Add
+                </button>
+              )}
+
+              {option.hasToggle && (
+                <label className="widget-toolbar__toggle">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={() => onToggleWidget(option.type as WidgetType)}
+                  />
+                  <span className="widget-toolbar__toggle-slider" />
+                </label>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      </div>
+
+      <div className="widget-toolbar__group">
+        <h4 className="widget-toolbar__group-title">Header</h4>
+        <div className="widget-toolbar__list">
+          {filterOptions(HEADER_WIDGETS).map((option) => {
+          const WidgetIcon = option.icon;
+          const isActive = option.type !== 'board' && option.type !== 'notes'
+            ? isWidgetActive(option.type as WidgetType)
+            : false;
+
+          return (
+            <div key={option.type} className="widget-toolbar__item">
+              <div className="widget-toolbar__item-info">
+                <WidgetIcon size={18} strokeWidth={2} />
                 <span>{option.label}</span>
               </div>
 
@@ -118,23 +168,25 @@ export function WidgetToolbar({
         })}
       </div>
 
-      {isWidgetActive('weather') && (
-        <div className="widget-toolbar__city">
-          <CityAutocomplete
-            value={cityInput}
-            onChange={setCityInput}
-            onSelect={onCityChange}
-            placeholder="Cidade"
-            id="widget-toolbar-city"
-          />
-          <button
-            className="widget-toolbar__apply-btn"
-            onClick={handleApplyCity}
-          >
-            Apply
-          </button>
-        </div>
-      )}
+          {isWidgetActive('weather') && (
+            <div className="widget-toolbar__city">
+              <CityAutocomplete
+                value={cityInput}
+                onChange={setCityInput}
+                onSelect={onCityChange}
+                placeholder="Cidade"
+                id="widget-toolbar-city"
+              />
+              <button
+                className="widget-toolbar__apply-btn"
+                onClick={handleApplyCity}
+              >
+                Apply
+              </button>
+            </div>
+          )}
+      </div>
+
     </div>
   );
 }
