@@ -24,7 +24,9 @@ import {
   exportData,
   importData,
   createWidget,
-  addRecentSearch
+  addRecentSearch,
+  removeRecentSearch,
+  clearRecentSearches
 } from '@shared/storage';
 import { BoardTabs } from './components/BoardTabs';
 import { WidgetGrid } from './components/WidgetGrid';
@@ -352,6 +354,23 @@ export function App() {
       .slice(0, 3);
   }, [widgets, searchQuery]);
 
+  const handleRemoveRecentSearch = (query: string) => {
+    setData((prev) => (prev ? removeRecentSearch(prev, query) : prev));
+  };
+
+  const handleClearRecentSearches = () => {
+    setConfirmState({
+      title: 'Limpar histórico',
+      message: 'Tem certeza que deseja limpar todo o histórico de buscas recentes?',
+      danger: true,
+      confirmLabel: 'Limpar',
+      onConfirm: () => {
+        setData((prev) => (prev ? clearRecentSearches(prev) : prev));
+        setConfirmState(null);
+      }
+    });
+  };
+
   const handleSearch = (query: string) => {
     const q = query.trim();
     if (!q) return;
@@ -398,6 +417,7 @@ export function App() {
             }}
             recentSearches={data.settings.recentSearches || []}
             linkSuggestions={linkSuggestions}
+            onRemoveRecentSearch={handleRemoveRecentSearch}
           />
         )}
 
@@ -515,6 +535,7 @@ export function App() {
           onClose={() => setShowSettings(false)}
           onExport={handleExport}
           onImport={handleImport}
+          onClearRecentSearches={handleClearRecentSearches}
         />
       )}
 

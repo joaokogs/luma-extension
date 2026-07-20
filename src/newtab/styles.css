@@ -478,6 +478,29 @@ body {
   color: var(--text-primary);
 }
 
+.search-suggestions__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  margin-left: auto;
+}
+
+.search-suggestions__item:hover .search-suggestions__remove {
+  opacity: 1;
+}
+
+.search-suggestions__remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
 .search-suggestions__icon {
   flex-shrink: 0;
   color: var(--text-muted);
@@ -1532,6 +1555,12 @@ body {
 
 .btn--danger:hover {
   background: var(--danger-hover);
+}
+
+.btn--danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--text-muted);
 }
 
 /* Confirm dialog */

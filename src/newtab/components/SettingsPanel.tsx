@@ -8,9 +8,10 @@ interface SettingsPanelProps {
   onClose: () => void;
   onExport: () => void;
   onImport: (file: File) => void;
+  onClearRecentSearches?: () => void;
 }
 
-export function SettingsPanel({ settings, onChange, onClose, onExport, onImport }: SettingsPanelProps) {
+export function SettingsPanel({ settings, onChange, onClose, onExport, onImport, onClearRecentSearches }: SettingsPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +61,15 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport 
             />
             <span className="widget-toolbar__toggle-slider" />
           </label>
+        </div>
+      </div>
+
+      <div className="settings-panel__section">
+        <label className="settings-panel__label">Histórico de Buscas</label>
+        <div className="backup-actions">
+          <button className="btn btn--danger" onClick={() => onClearRecentSearches?.()} disabled={!(settings.recentSearches && settings.recentSearches.length > 0)}>
+            <Icon name="trash" size={14} /> Limpar histórico
+          </button>
         </div>
       </div>
 

@@ -124,6 +124,15 @@ export function updateSettings(data: AppData, settings: Partial<AppSettings>): A
   };
 }
 
+export function removeRecentSearch(data: AppData, query: string): AppData {
+  const recent = data.settings.recentSearches || [];
+  return updateSettings(data, { recentSearches: recent.filter((s) => s !== query) });
+}
+
+export function clearRecentSearches(data: AppData): AppData {
+  return updateSettings(data, { recentSearches: [] });
+}
+
 export function updateTopWidgets(data: AppData, topWidgets: TopWidgetConfig[]): AppData {
   return updateSettings(data, { topWidgets });
 }

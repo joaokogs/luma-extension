@@ -16,6 +16,7 @@ interface SearchBarProps {
   onOpenLink: (url: string) => void;
   recentSearches: string[];
   linkSuggestions: LinkItem[];
+  onRemoveRecentSearch?: (query: string) => void;
 }
 
 export function SearchBar({
@@ -27,6 +28,7 @@ export function SearchBar({
   onOpenLink,
   recentSearches,
   linkSuggestions,
+  onRemoveRecentSearch,
 }: SearchBarProps) {
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
@@ -226,6 +228,15 @@ export function SearchBar({
                   className="search-suggestions__icon"
                 />
                 <span className="search-suggestions__text">{item.text}</span>
+                {item.type === 'recent' && onRemoveRecentSearch && (
+                  <button
+                    className="search-suggestions__remove"
+                    onClick={(e) => { e.stopPropagation(); onRemoveRecentSearch(item.text); }}
+                    aria-label={`Remover busca "${item.text}"`}
+                  >
+                    <Icon name="close" size={12} />
+                  </button>
+                )}
               </li>
             </>
           ))}
