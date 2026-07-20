@@ -17,10 +17,38 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
   const [editValue, setEditValue] = useState('');
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const kebabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (el) {
+      setCanScrollLeft(el.scrollLeft > 0);
+      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener('scroll', checkScroll);
+    const observer = new ResizeObserver(checkScroll);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      observer.disconnect();
+    };
+  }, [boards]);
+
+  const scrollBy = (dir: 'left' | 'right') => {
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     if (editingId && inputRef.current) {
@@ -96,77 +124,97 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
 
   return (
     <nav className="board-tabs" aria-label="Boards">
-      {boards.map((board) => (
-        <div
-          key={board.id}
-          className={`board-tab ${board.id === activeId ? 'board-tab--active' : ''}`}
-          onClick={() => onSelect(board.id)}
-          onContextMenu={(e) => handleContextMenu(e, board.id)}
-          role="button"
-          tabIndex={0}
-          aria-label={`Abrir board ${board.title}`}
-          onKeyDown={(e) => e.key === 'Enter' && onSelect(board.id)}
+      {canScrollLeft && (
+        <button
+          className="board-tabs__arrow board-tabs__arrow--left"
+          onClick={() => scrollBy('left')}
+          aria-label="Rolar para esquerda"
         >
-          {editingId === board.id ? (
-            <input
-              ref={inputRef}
-              className="board-tab__input"
-              value={editValue}
-              onChange={(e) => setEditValue((e.target as HTMLInputElement).value)}
-              onBlur={commitRename}
-              onKeyDown={handleKeyDown}
-              onClick={(e) => e.stopPropagation()}
-              aria-label="Renomear board"
-            />
-          ) : (
-            <>
-              <span className="board-tab__title">{board.title}</span>
-              {board.id === activeId && (
-                <div className="board-tab__actions">
-                  <button
-                    ref={(el) => { kebabRefs.current[board.id] = el; }}
-                    className="board-tab__kebab"
-                    onClick={(e) => handleKebabClick(e, board.id)}
-                    aria-label="Ações da aba"
-                    title="Ações"
-                  >
-                    <Icon name="more-vertical" size={12} />
-                  </button>
-                  {menuOpenId === board.id && createPortal(
-                    <div
-                      ref={menuRef}
-                      className="board-tab__menu"
-                      style={{ position: 'fixed', top: menuPos.top, right: menuPos.right }}
+          <Icon name="chevron-left" size={16} />
+        </button>
+      )}
+      <div className="board-tabs__scroll" ref={scrollRef}>
+        {boards.map((board) => (
+          <div
+            key={board.id}
+            className={`board-tab ${board.id === activeId ? 'board-tab--active' : ''}`}
+            onClick={() => onSelect(board.id)}
+            onContextMenu={(e) => handleContextMenu(e, board.id)}
+            role="button"
+            tabIndex={0}
+            aria-label={`Abrir board ${board.title}`}
+            onKeyDown={(e) => e.key === 'Enter' && onSelect(board.id)}
+          >
+            {editingId === board.id ? (
+              <input
+                ref={inputRef}
+                className="board-tab__input"
+                value={editValue}
+                onChange={(e) => setEditValue((e.target as HTMLInputElement).value)}
+                onBlur={commitRename}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+                aria-label="Renomear board"
+              />
+            ) : (
+              <>
+                <span className="board-tab__title">{board.title}</span>
+                {board.id === activeId && (
+                  <div className="board-tab__actions">
+                    <button
+                      ref={(el) => { kebabRefs.current[board.id] = el; }}
+                      className="board-tab__kebab"
+                      onClick={(e) => handleKebabClick(e, board.id)}
+                      aria-label="Ações da aba"
+                      title="Ações"
                     >
-                      <button
-                        className="board-tab__menu-item"
-                        onClick={handleAction(() => startRename(board))}
+                      <Icon name="more-vertical" size={12} />
+                    </button>
+                    {menuOpenId === board.id && createPortal(
+                      <div
+                        ref={menuRef}
+                        className="board-tab__menu"
+                        style={{ position: 'fixed', top: menuPos.top, right: menuPos.right }}
                       >
-                        <Icon name="edit" size={12} />
-                        Renomear
-                      </button>
-                      {boards.length > 1 && (
                         <button
-                          className="board-tab__menu-item board-tab__menu-item--danger"
-                          onClick={handleAction(() => onDelete(board.id, board.title))}
+                          className="board-tab__menu-item"
+                          onClick={handleAction(() => startRename(board))}
                         >
-                          <Icon name="trash" size={12} />
-                          Excluir
+                          <Icon name="edit" size={12} />
+                          Renomear
                         </button>
-                      )}
-                    </div>,
-                    document.body
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ))}
+                        {boards.length > 1 && (
+                          <button
+                            className="board-tab__menu-item board-tab__menu-item--danger"
+                            onClick={handleAction(() => onDelete(board.id, board.title))}
+                          >
+                            <Icon name="trash" size={12} />
+                            Excluir
+                          </button>
+                        )}
+                      </div>,
+                      document.body
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        ))}
 
-      <button className="board-tab board-tab--add" onClick={onAdd} aria-label="Criar nova aba" title="Nova aba">
-        <Icon name="plus" size={14} />
-      </button>
+        <button className="board-tab board-tab--add" onClick={onAdd} aria-label="Criar nova aba" title="Nova aba">
+          <Icon name="plus" size={14} />
+        </button>
+      </div>
+      {canScrollRight && (
+        <button
+          className="board-tabs__arrow board-tabs__arrow--right"
+          onClick={() => scrollBy('right')}
+          aria-label="Rolar para direita"
+        >
+          <Icon name="chevron-right" size={16} />
+        </button>
+      )}
     </nav>
   );
 }

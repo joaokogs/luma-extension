@@ -8,8 +8,6 @@ interface TopInfoWidgetsProps {
 }
 
 export function TopInfoWidgets({ configs }: TopInfoWidgetsProps) {
-  if (configs.length === 0) return null;
-
   return (
     <div className="top-info-widgets">
       {configs.map((config, index) => (
