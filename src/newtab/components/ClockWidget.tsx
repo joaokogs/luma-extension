@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
 export function ClockWidgetView({ timezone, label }: { timezone?: string; label?: string }) {
   const [now, setNow] = useState(new Date());
@@ -16,10 +16,10 @@ export function ClockWidgetView({ timezone, label }: { timezone?: string; label?
     timeZone: timezone,
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: false
   };
 
-  const timeStr = timezone ? now.toLocaleTimeString('en-US', options) : formatTime(now);
+  const timeStr = timezone ? now.toLocaleTimeString('pt-BR', options) : formatTime(now);
   const weekday = WEEKDAYS[now.getDay()];
   const month = MONTHS[now.getMonth()];
   const day = now.getDate();
@@ -34,9 +34,7 @@ export function ClockWidgetView({ timezone, label }: { timezone?: string; label?
 }
 
 function formatTime(date: Date): string {
-  let hours = date.getHours();
+  const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-  return `${hours}:${minutes} ${ampm}`;
+  return `${hours}:${minutes}`;
 }
