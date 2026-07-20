@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'preact/hooks';
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+const DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 export function CalendarWidgetView() {
   const [today, setToday] = useState(new Date());
@@ -17,7 +17,7 @@ export function CalendarWidgetView() {
 
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
-  const firstDay = new Date(year, monthIndex, 1).getDay();
+  const firstDay = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
   const prevMonth = () => setMonth(new Date(year, monthIndex - 1, 1));
