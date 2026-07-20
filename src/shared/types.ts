@@ -1,0 +1,161 @@
+/**
+ * Shared type definitions for the Boards New Tab extension.
+ * Keep this file dependency-free so it can be imported anywhere.
+ */
+
+export type WidgetType = 'links' | 'calendar' | 'pomodoro' | 'clock' | 'weather' | 'focus';
+
+export interface LinkItem {
+  id: string;
+  title: string;
+  url: string;
+  icon?: string;
+  favicon?: string;
+}
+
+export interface BaseWidget {
+  id: string;
+  type: WidgetType;
+  title: string;
+  colSpan: number; // 1 or 2 grid columns
+  order: number;
+  height?: number; // fixed height in pixels; if omitted, auto
+  col?: number; // target column index (0-based); if omitted, falls back to column 0
+}
+
+export interface LinksWidget extends BaseWidget {
+  type: 'links';
+  items: LinkItem[];
+}
+
+export interface CalendarWidget extends BaseWidget {
+  type: 'calendar';
+}
+
+export interface PomodoroWidget extends BaseWidget {
+  type: 'pomodoro';
+}
+
+export interface ClockWidget extends BaseWidget {
+  type: 'clock';
+  timezone?: string;
+  label?: string;
+}
+
+export interface WeatherWidget extends BaseWidget {
+  type: 'weather';
+  city?: string;
+}
+
+export interface FocusWidget extends BaseWidget {
+  type: 'focus';
+  targetMinutes?: number;
+}
+
+export type Widget = LinksWidget | CalendarWidget | PomodoroWidget | ClockWidget | WeatherWidget | FocusWidget;
+
+export interface Board {
+  id: string;
+  title: string;
+  widgets: Widget[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AppSettings {
+  theme: 'light' | 'dark' | 'system';
+  wallpaper: WallpaperSetting;
+  lastBoardId?: string;
+  topWidgets?: TopWidgetConfig[];
+}
+
+export interface WallpaperSetting {
+  type: 'gradient' | 'url' | 'solid';
+  value: string;
+}
+
+export type TopWidgetType = 'clock' | 'weather' | 'focus' | 'search';
+
+export interface TopWidgetConfig {
+  type: TopWidgetType;
+  city?: string;
+  timezone?: string;
+  label?: string;
+  targetMinutes?: number;
+}
+
+export interface AppData {
+  boards: Board[];
+  settings: AppSettings;
+  installedAt: number;
+}
+
+export const DEFAULT_WALLPAPERS: WallpaperSetting[] = [
+  { type: 'gradient', value: 'linear-gradient(160deg, #4a90e2 0%, #7bb7f0 40%, #a8d5f0 70%, #d4e9f7 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
+  { type: 'gradient', value: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' },
+  { type: 'solid', value: '#f8fafc' },
+  { type: 'solid', value: '#0f172a' }
+];
+
+export function generateId(prefix: string): string {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+export const INITIAL_SAMPLE_BOARDS: Board[] = [
+  {
+    id: 'board-home',
+    title: 'Home',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    widgets: [
+      { id: generateId('widget'), type: 'links', title: 'Work', colSpan: 1, order: 0, col: 0, items: [] },
+      { id: generateId('widget'), type: 'links', title: 'Social', colSpan: 1, order: 0, col: 1, items: [] },
+      { id: generateId('widget'), type: 'links', title: 'Learn', colSpan: 1, order: 0, col: 2, items: [] },
+      { id: generateId('widget'), type: 'calendar', title: 'Calendar', colSpan: 1, order: 0, col: 3 },
+      { id: generateId('widget'), type: 'pomodoro', title: 'Pomodoro', colSpan: 1, order: 1, col: 3 }
+    ]
+  },
+  {
+    id: 'board-personal',
+    title: 'Personal',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    widgets: []
+  },
+  {
+    id: 'board-learning',
+    title: 'Learning',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    widgets: []
+  },
+  {
+    id: 'board-projects',
+    title: 'Projects',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    widgets: []
+  }
+];
+
+export function getDefaultData(): AppData {
+  return {
+    boards: INITIAL_SAMPLE_BOARDS,
+    settings: {
+      theme: 'system',
+      wallpaper: DEFAULT_WALLPAPERS[0],
+      topWidgets: [
+        { type: 'weather', city: 'New York' },
+        { type: 'focus', targetMinutes: 240 },
+        { type: 'clock' }
+      ]
+    },
+    installedAt: Date.now()
+  };
+}

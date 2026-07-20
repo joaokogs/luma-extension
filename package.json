@@ -1,0 +1,29 @@
+{
+  "name": "boards-new-tab",
+  "version": "1.0.0",
+  "description": "A fast, beautiful new tab replacement for Firefox with visual boards for links, tabs and notes.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:icons": "node scripts/build-icons.js",
+    "build": "npm run build:icons && tsc && vite build",
+    "preview": "vite preview",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.3.1",
+    "@fortawesome/free-brands-svg-icons": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "preact": "^10.22.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.8.3",
+    "@types/node": "^26.1.1",
+    "@types/webextension-polyfill": "^0.10.7",
+    "rimraf": "^5.0.7",
+    "sharp": "^0.35.3",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.13",
+    "webextension-polyfill": "^0.12.0"
+  }
+}
