@@ -653,6 +653,10 @@ body {
   transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
+.app-fab-menu__item svg {
+  flex: 0 0 auto;
+}
+
 .app-fab-menu__item:hover {
   background: var(--bg-surface-hover);
   color: var(--accent);

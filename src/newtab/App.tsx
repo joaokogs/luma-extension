@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { Settings } from 'lucide-preact';
 import type { AppData, Widget, WidgetType, TopWidgetConfig, SearchEngine } from '@shared/types';
 import { SEARCH_ENGINES } from '@shared/types';
 import {
@@ -430,7 +431,7 @@ export function App() {
             aria-label="Configurações"
             title="Configurações"
           >
-            <Icon name="settings" size={18} />
+            <Settings size={18} strokeWidth={2} aria-hidden="true" />
             <span>Configurações</span>
           </button>
         </div>
