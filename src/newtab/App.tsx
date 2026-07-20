@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import type { AppData, Widget, WidgetType, TopWidgetConfig } from '@shared/types';
+import type { AppData, Widget, WidgetType, TopWidgetConfig, SearchEngine } from '@shared/types';
+import { SEARCH_ENGINES } from '@shared/types';
 import {
   loadData,
   saveData,
@@ -66,6 +67,8 @@ export function App() {
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [showNewTabDialog, setShowNewTabDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchEngine, setSearchEngine] = useState<SearchEngine>('google');
+  const [engineDropdownOpen, setEngineDropdownOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -109,6 +112,39 @@ export function App() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (!engineDropdownOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      const el = document.querySelector('.search-engine-btn');
+      const dd = document.querySelector('.search-engine-dropdown');
+      if (dd && !dd.contains(e.target as Node) && el && !el.contains(e.target as Node)) {
+        setEngineDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [engineDropdownOpen]);
+
+  useEffect(() => {
+    const searchWidget = data?.settings.topWidgets?.find((w) => w.type === 'search');
+    if (searchWidget?.searchEngine) {
+      setSearchEngine(searchWidget.searchEngine);
+    }
+  }, [data?.settings.topWidgets]);
+
+  const handleEngineChange = (engine: SearchEngine) => {
+    setSearchEngine(engine);
+    setEngineDropdownOpen(false);
+    const currentTopWidgets = data?.settings.topWidgets || [];
+    const next = currentTopWidgets.map((w) =>
+      w.type === 'search' ? { ...w, searchEngine: engine } : w
+    );
+    if (!next.some((w) => w.type === 'search')) {
+      next.push({ type: 'search', searchEngine: engine });
+    }
+    handleSettingsChange({ topWidgets: next });
+  };
 
   const activeBoard = useMemo(
     () => (data && activeBoardId ? getBoardById(data, activeBoardId) : undefined),
@@ -354,7 +390,21 @@ export function App() {
 
         {data.settings.topWidgets?.some((w) => w.type === 'search') && (
           <div className="app-header__search">
-            <Icon name="search" size={18} />
+            <div className="search-tools">
+              <Icon name="search" size={22} className="app-header__search-icon" />
+              <button
+                className="search-engine-btn"
+                onClick={() => setEngineDropdownOpen((s) => !s)}
+                aria-label="Alterar buscador"
+                title={SEARCH_ENGINES.find((e) => e.id === searchEngine)?.name}
+              >
+                <img
+                  src={SEARCH_ENGINES.find((e) => e.id === searchEngine)?.icon}
+                  alt=""
+                  className="search-engine-btn__icon"
+                />
+              </button>
+            </div>
             <input
               type="text"
               placeholder="Pesquisar ou digitar URL..."
@@ -363,8 +413,12 @@ export function App() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && searchQuery.trim()) {
                   const q = searchQuery.trim();
-                  const url = looksLikeUrl(q) ? ensureProtocol(q) : `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-                  window.open(url, '_blank');
+                  if (looksLikeUrl(q)) {
+                    window.open(ensureProtocol(q), '_blank');
+                  } else {
+                    const engineUrl = SEARCH_ENGINES.find((e) => e.id === searchEngine)?.url || SEARCH_ENGINES[0].url;
+                    window.open(`${engineUrl}${encodeURIComponent(q)}`, '_blank');
+                  }
                 }
               }}
               aria-label="Pesquisar ou digitar URL"
@@ -377,6 +431,20 @@ export function App() {
               >
                 <Icon name="close" size={14} />
               </button>
+            )}
+            {engineDropdownOpen && (
+              <div className="search-engine-dropdown">
+                {SEARCH_ENGINES.map((engine) => (
+                  <button
+                    key={engine.id}
+                    className={`search-engine-dropdown__item ${engine.id === searchEngine ? 'search-engine-dropdown__item--active' : ''}`}
+                    onClick={() => handleEngineChange(engine.id)}
+                  >
+                    <img src={engine.icon} alt="" className="search-engine-dropdown__icon" />
+                    {engine.name}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
