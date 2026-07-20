@@ -196,6 +196,7 @@ body {
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
   user-select: none;
+  touch-action: none;
   outline: none;
 }
 
@@ -209,6 +210,47 @@ body {
   background: var(--bg-active);
   color: var(--text-primary);
   box-shadow: var(--shadow-sm);
+}
+
+.board-tab--dragging {
+  opacity: 0.4;
+}
+
+.board-tab--drop-before::before,
+.board-tab--drop-after::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.board-tab--drop-before::before {
+  left: -1px;
+}
+
+.board-tab--drop-after::after {
+  right: -1px;
+}
+
+.board-tab__drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  opacity: 0.3;
+  transition: opacity var(--transition-fast);
+}
+
+.board-tab:hover .board-tab__drag-handle {
+  opacity: 0.7;
+}
+
+.board-tab:active .board-tab__drag-handle {
+  cursor: grabbing;
 }
 
 .board-tab__input {

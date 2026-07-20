@@ -93,6 +93,17 @@ export function renameBoard(data: AppData, boardId: string, title: string): AppD
   };
 }
 
+export function reorderBoard(data: AppData, boardId: string, toIndex: number): AppData {
+  const idx = data.boards.findIndex((b) => b.id === boardId);
+  if (idx === -1) return data;
+  const clamped = Math.max(0, Math.min(toIndex, data.boards.length - 1));
+  if (idx === clamped) return data;
+  const boards = [...data.boards];
+  const [moved] = boards.splice(idx, 1);
+  boards.splice(clamped, 0, moved);
+  return { ...data, boards };
+}
+
 export function deleteBoard(data: AppData, boardId: string): AppData {
   const boards = data.boards.filter((b) => b.id !== boardId);
   return {

@@ -8,6 +8,7 @@ import {
   createBoard,
   addBoard,
   renameBoard,
+  reorderBoard,
   deleteBoard,
   addWidget,
   deleteWidget,
@@ -167,6 +168,10 @@ export function App() {
 
   const handleRenameBoard = (id: string, title: string) => {
     setData((prev) => (prev ? renameBoard(prev, id, title) : prev));
+  };
+
+  const handleReorderBoard = (id: string, toIndex: number) => {
+    setData((prev) => (prev ? reorderBoard(prev, id, toIndex) : prev));
   };
 
   const handleDeleteBoard = (id: string, boardTitle: string) => {
@@ -402,6 +407,7 @@ export function App() {
           onAdd={handleAddBoard}
           onRename={handleRenameBoard}
           onDelete={(id, title) => handleDeleteBoard(id, title)}
+          onReorder={handleReorderBoard}
         />
 
         {data.settings.topWidgets?.some((w) => w.type === 'search') && (
