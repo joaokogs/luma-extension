@@ -124,6 +124,8 @@ export function App() {
     return <div className="app-loading" aria-label="Carregando Boards" />;
   }
 
+  const editModeEnabled = data.settings.editMode !== false;
+
   const handleAddBoard = () => {
     setShowNewTabDialog(true);
   };
@@ -396,15 +398,17 @@ export function App() {
         </button>
 
         <div className={`app-fab-menu ${menuOpen ? 'app-fab-menu--open' : ''}`}>
-          <button
-            className="app-fab-menu__item"
-            onClick={() => { setShowWidgetToolbar(true); setMenuOpen(false); }}
-            aria-label="Adicionar widget"
-            title="Adicionar widget"
-          >
-            <Icon name="plus" size={18} />
-            <span>Adicionar widget</span>
-          </button>
+          {editModeEnabled && (
+            <button
+              className="app-fab-menu__item"
+              onClick={() => { setShowWidgetToolbar(true); setMenuOpen(false); }}
+              aria-label="Adicionar widget"
+              title="Adicionar widget"
+            >
+              <Icon name="plus" size={18} />
+              <span>Adicionar widget</span>
+            </button>
+          )}
           <button
             className="app-fab-menu__item"
             onClick={() => { setShowSettings(true); setMenuOpen(false); }}
@@ -438,7 +442,7 @@ export function App() {
             onResizeWidget={handleResizeWidget}
             onAddWidget={handleStartAddWidget}
             onMoveLink={handleMoveLink}
-            isEditing={!searchQuery.trim()}
+            isEditing={editModeEnabled && !searchQuery.trim()}
           />
         )}
       </main>
@@ -494,6 +498,7 @@ export function App() {
           onAddWidget={handleAddWidgetFromToolbar}
           onCityChange={handleToolbarCityChange}
           onClose={() => setShowWidgetToolbar(false)}
+          editMode={editModeEnabled}
         />
       )}
 

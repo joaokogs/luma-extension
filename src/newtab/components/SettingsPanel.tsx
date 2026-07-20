@@ -40,10 +40,25 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport 
   return (
     <div className="settings-panel" ref={panelRef} role="dialog" aria-label="Configurações">
       <div className="settings-panel__header">
-        <h3>Aparência</h3>
+        <h3>Configurações</h3>
         <button className="settings-panel__close" onClick={onClose} aria-label="Fechar configurações">
           <Icon name="close" size={18} />
         </button>
+      </div>
+
+      <div className="settings-panel__section">
+        <label className="settings-panel__label">Modo de Edição</label>
+        <div className="settings-panel__toggle-row">
+          <span className="settings-panel__toggle-desc">Permitir adicionar, editar e excluir widgets</span>
+          <label className="widget-toolbar__toggle">
+            <input
+              type="checkbox"
+              checked={settings.editMode !== false}
+              onChange={() => onChange({ editMode: settings.editMode === false ? true : false })}
+            />
+            <span className="widget-toolbar__toggle-slider" />
+          </label>
+        </div>
       </div>
 
       <div className="settings-panel__section">

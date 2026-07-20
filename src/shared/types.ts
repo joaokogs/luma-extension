@@ -67,6 +67,7 @@ export interface AppSettings {
   wallpaper: WallpaperSetting;
   lastBoardId?: string;
   topWidgets?: TopWidgetConfig[];
+  editMode?: boolean;
 }
 
 export interface WallpaperSetting {
@@ -154,7 +155,8 @@ export function getDefaultData(): AppData {
         { type: 'weather', city: 'New York' },
         { type: 'focus', targetMinutes: 240 },
         { type: 'clock' }
-      ]
+      ],
+      editMode: true
     },
     installedAt: Date.now()
   };

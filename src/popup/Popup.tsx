@@ -146,6 +146,8 @@ export function Popup() {
     return <div className="popup popup--loading">Carregando...</div>;
   }
 
+  const editModeEnabled = data.settings.editMode !== false;
+
   if (!tabInfo) {
     return (
       <div className="popup">
@@ -211,29 +213,33 @@ export function Popup() {
           <div className="popup__links-header">
             <div className="popup__links-header-left">
               <span className="popup__links-title">{selectedWidget.title}</span>
-              <button
-                className="popup__icon-btn popup__icon-btn--small"
-                onClick={() => setDialog('widget')}
-                aria-label="Editar bloco"
-                title="Editar bloco"
-              >
-                <Icon name="settings" size={14} />
-              </button>
+              {editModeEnabled && (
+                <button
+                  className="popup__icon-btn popup__icon-btn--small"
+                  onClick={() => setDialog('widget')}
+                  aria-label="Editar bloco"
+                  title="Editar bloco"
+                >
+                  <Icon name="settings" size={14} />
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        <div className="popup__links-plus">
-          <button
-            className="popup__add-link-btn"
-            onClick={() => setDialog('add-link')}
-            aria-label="Adicionar link"
-            title="Adicionar link"
-          >
-            <Icon name="plus" size={18} />
-            Adicionar link
-          </button>
-        </div>
+        {editModeEnabled && (
+          <div className="popup__links-plus">
+            <button
+              className="popup__add-link-btn"
+              onClick={() => setDialog('add-link')}
+              aria-label="Adicionar link"
+              title="Adicionar link"
+            >
+              <Icon name="plus" size={18} />
+              Adicionar link
+            </button>
+          </div>
+        )}
 
         {selectedWidget && selectedWidget.items.length > 0 && (
           <ul className="popup__links">
@@ -241,8 +247,8 @@ export function Popup() {
               <LinkRow
                 key={link.id}
                 link={link}
-                onEdit={() => setDialog({ edit: link.id })}
-                onDelete={() => handleDeleteLink(link.id)}
+                onEdit={editModeEnabled ? () => setDialog({ edit: link.id }) : undefined}
+                onDelete={editModeEnabled ? () => handleDeleteLink(link.id) : undefined}
               />
             ))}
           </ul>
@@ -258,14 +264,16 @@ export function Popup() {
 
         <div className="popup__divider" />
 
-        <button
-          className={`popup__save ${status === 'saved' ? 'popup__save--success' : ''}`}
-          onClick={handleSave}
-          disabled={status === 'saving' || status === 'saved'}
-          aria-live="polite"
-        >
-          {status === 'saved' ? 'Salvo!' : status === 'saving' ? 'Salvando...' : `Salvar aba em ${activeBoard?.title}`}
-        </button>
+        {editModeEnabled && (
+          <button
+            className={`popup__save ${status === 'saved' ? 'popup__save--success' : ''}`}
+            onClick={handleSave}
+            disabled={status === 'saving' || status === 'saved'}
+            aria-live="polite"
+          >
+            {status === 'saved' ? 'Salvo!' : status === 'saving' ? 'Salvando...' : `Salvar aba em ${activeBoard?.title}`}
+          </button>
+        )}
 
         <p className="popup__hint">Abra uma nova aba para ver seus boards.</p>
       </div>
@@ -303,8 +311,8 @@ function LinkRow({
   onDelete
 }: {
   link: LinkItem;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
   const favicon = link.favicon && !imageError ? link.favicon : getFaviconUrl(link.url);
@@ -336,24 +344,30 @@ function LinkRow({
         {link.title}
       </a>
       <span className="popup__link-url">{cleanUrl(link.url)}</span>
-      <div className="popup__link-actions">
-        <button
-          className="popup__icon-btn popup__icon-btn--action"
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          aria-label={`Editar ${link.title}`}
-          title="Editar"
-        >
-          <Icon name="edit" size={15} />
-        </button>
-        <button
-          className="popup__icon-btn popup__icon-btn--action popup__icon-btn--danger"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          aria-label={`Excluir ${link.title}`}
-          title="Excluir"
-        >
-          <Icon name="trash" size={15} />
-        </button>
-      </div>
+      {(onEdit || onDelete) && (
+        <div className="popup__link-actions">
+          {onEdit && (
+            <button
+              className="popup__icon-btn popup__icon-btn--action"
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              aria-label={`Editar ${link.title}`}
+              title="Editar"
+            >
+              <Icon name="edit" size={15} />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              className="popup__icon-btn popup__icon-btn--action popup__icon-btn--danger"
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              aria-label={`Excluir ${link.title}`}
+              title="Excluir"
+            >
+              <Icon name="trash" size={15} />
+            </button>
+          )}
+        </div>
+      )}
     </li>
   );
 }

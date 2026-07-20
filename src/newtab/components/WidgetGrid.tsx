@@ -248,13 +248,13 @@ export function WidgetGrid({
                   onEdit={isEditing ? () => onEditWidget(widget) : undefined}
                   onDelete={isEditing ? () => onDeleteWidget(widget.id) : undefined}
                   onAddLink={isEditing && widget.type === 'links' && onAddLink ? () => onAddLink(widget) : undefined}
-                  onResize={onResizeWidget ? (h) => onResizeWidget(widget.id, h) : undefined}
+                  onResize={isEditing && onResizeWidget ? (h) => onResizeWidget(widget.id, h) : undefined}
                 >
                   <WidgetContent
                     widget={widget}
                     linkDrag={linkDrag}
-                    onDeleteLink={(linkId) => onDeleteLink(widget.id, linkId)}
-                    onEditLink={onEditLink ? (linkId) => onEditLink(widget.id, linkId) : undefined}
+                    onDeleteLink={isEditing ? (linkId) => onDeleteLink(widget.id, linkId) : undefined}
+                    onEditLink={isEditing && onEditLink ? (linkId) => onEditLink(widget.id, linkId) : undefined}
                     onLinkDragStart={isEditing ? (e, linkId) => handleLinkDragStart(e, linkId, widget.id) : undefined}
                     onLinkDragEnd={isEditing ? handleLinkDragEnd : undefined}
                     onLinkDrop={isEditing ? (targetLinkId, position) => handleLinkDrop(widget.id, targetLinkId, position) : undefined}
