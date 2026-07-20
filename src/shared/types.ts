@@ -68,6 +68,7 @@ export interface AppSettings {
   lastBoardId?: string;
   topWidgets?: TopWidgetConfig[];
   editMode?: boolean;
+  recentSearches?: string[];
 }
 
 export interface WallpaperSetting {
@@ -79,11 +80,11 @@ export type TopWidgetType = 'clock' | 'weather' | 'focus' | 'search';
 
 export type SearchEngine = 'google' | 'yahoo' | 'bing' | 'duckduckgo';
 
-export const SEARCH_ENGINES: { id: SearchEngine; name: string; url: string; icon: string }[] = [
-  { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
-  { id: 'yahoo', name: 'Yahoo', url: 'https://search.yahoo.com/search?p=', icon: 'https://s.yimg.com/rz/l/favicon.ico' },
-  { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico' },
-  { id: 'duckduckgo', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: 'https://duckduckgo.com/favicon.ico' }
+export const SEARCH_ENGINES: { id: SearchEngine; name: string; url: string; icon: string; autocomplete: string }[] = [
+  { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico', autocomplete: 'https://suggestqueries.google.com/complete/search?client=firefox&q=' },
+  { id: 'yahoo', name: 'Yahoo', url: 'https://search.yahoo.com/search?p=', icon: 'https://s.yimg.com/rz/l/favicon.ico', autocomplete: 'https://suggestqueries.google.com/complete/search?client=firefox&q=' },
+  { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico', autocomplete: 'https://api.bing.com/osjson.aspx?query=' },
+  { id: 'duckduckgo', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: 'https://duckduckgo.com/favicon.ico', autocomplete: 'https://duckduckgo.com/ac/?q=' }
 ];
 
 export interface TopWidgetConfig {

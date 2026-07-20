@@ -22,7 +22,8 @@ import {
   getWidgetsForBoard,
   exportData,
   importData,
-  createWidget
+  createWidget,
+  addRecentSearch
 } from '@shared/storage';
 import { BoardTabs } from './components/BoardTabs';
 import { WidgetGrid } from './components/WidgetGrid';
@@ -34,6 +35,7 @@ import { WidgetToolbar } from './components/WidgetToolbar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { NewTabDialog } from './components/NewTabDialog';
 import { Icon } from './components/Icon';
+import { SearchBar } from './components/SearchBar';
 import './styles.css';
 
 function looksLikeUrl(str: string): boolean {
@@ -68,7 +70,6 @@ export function App() {
   const [showNewTabDialog, setShowNewTabDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchEngine, setSearchEngine] = useState<SearchEngine>('google');
-  const [engineDropdownOpen, setEngineDropdownOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -114,19 +115,6 @@ export function App() {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!engineDropdownOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      const el = document.querySelector('.search-engine-btn');
-      const dd = document.querySelector('.search-engine-dropdown');
-      if (dd && !dd.contains(e.target as Node) && el && !el.contains(e.target as Node)) {
-        setEngineDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [engineDropdownOpen]);
-
-  useEffect(() => {
     const searchWidget = data?.settings.topWidgets?.find((w) => w.type === 'search');
     if (searchWidget?.searchEngine) {
       setSearchEngine(searchWidget.searchEngine);
@@ -135,7 +123,6 @@ export function App() {
 
   const handleEngineChange = (engine: SearchEngine) => {
     setSearchEngine(engine);
-    setEngineDropdownOpen(false);
     const currentTopWidgets = data?.settings.topWidgets || [];
     const next = currentTopWidgets.map((w) =>
       w.type === 'search' ? { ...w, searchEngine: engine } : w
@@ -366,6 +353,18 @@ export function App() {
       .filter((w): w is Widget => w !== null);
   }, [widgets, searchQuery]);
 
+  const handleSearch = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    if (looksLikeUrl(q)) {
+      window.open(ensureProtocol(q), '_blank');
+    } else {
+      const engineUrl = SEARCH_ENGINES.find((e) => e.id === searchEngine)?.url || SEARCH_ENGINES[0].url;
+      window.open(`${engineUrl}${encodeURIComponent(q)}`, '_blank');
+    }
+    setData((prev) => (prev ? addRecentSearch(prev, q) : prev));
+  };
+
   const hasNoResults = searchQuery.trim() && displayedWidgets.length === 0;
 
   return (
@@ -389,64 +388,14 @@ export function App() {
         />
 
         {data.settings.topWidgets?.some((w) => w.type === 'search') && (
-          <div className="app-header__search">
-            <div className="search-tools">
-              <Icon name="search" size={22} className="app-header__search-icon" />
-              <button
-                className="search-engine-btn"
-                onClick={() => setEngineDropdownOpen((s) => !s)}
-                aria-label="Alterar buscador"
-                title={SEARCH_ENGINES.find((e) => e.id === searchEngine)?.name}
-              >
-                <img
-                  src={SEARCH_ENGINES.find((e) => e.id === searchEngine)?.icon}
-                  alt=""
-                  className="search-engine-btn__icon"
-                />
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="Pesquisar ou digitar URL..."
-              value={searchQuery}
-              onInput={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && searchQuery.trim()) {
-                  const q = searchQuery.trim();
-                  if (looksLikeUrl(q)) {
-                    window.open(ensureProtocol(q), '_blank');
-                  } else {
-                    const engineUrl = SEARCH_ENGINES.find((e) => e.id === searchEngine)?.url || SEARCH_ENGINES[0].url;
-                    window.open(`${engineUrl}${encodeURIComponent(q)}`, '_blank');
-                  }
-                }
-              }}
-              aria-label="Pesquisar ou digitar URL"
-            />
-            {searchQuery && (
-              <button
-                className="app-header__clear"
-                onClick={() => setSearchQuery('')}
-                aria-label="Limpar busca"
-              >
-                <Icon name="close" size={14} />
-              </button>
-            )}
-            {engineDropdownOpen && (
-              <div className="search-engine-dropdown">
-                {SEARCH_ENGINES.map((engine) => (
-                  <button
-                    key={engine.id}
-                    className={`search-engine-dropdown__item ${engine.id === searchEngine ? 'search-engine-dropdown__item--active' : ''}`}
-                    onClick={() => handleEngineChange(engine.id)}
-                  >
-                    <img src={engine.icon} alt="" className="search-engine-dropdown__icon" />
-                    {engine.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            searchEngine={searchEngine}
+            onEngineChange={handleEngineChange}
+            onSearch={handleSearch}
+            recentSearches={data.settings.recentSearches || []}
+          />
         )}
 
         <TopInfoWidgets

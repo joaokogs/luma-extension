@@ -128,6 +128,15 @@ export function updateTopWidgets(data: AppData, topWidgets: TopWidgetConfig[]): 
   return updateSettings(data, { topWidgets });
 }
 
+export function addRecentSearch(data: AppData, query: string): AppData {
+  const trimmed = query.trim();
+  if (!trimmed) return data;
+  const recent = data.settings.recentSearches || [];
+  const filtered = recent.filter((s) => s !== trimmed);
+  const next = [trimmed, ...filtered].slice(0, 10);
+  return updateSettings(data, { recentSearches: next });
+}
+
 // Widgets
 export function createWidget(type: WidgetType, title: string): Widget {
   const base = {
