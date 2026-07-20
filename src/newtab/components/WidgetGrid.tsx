@@ -269,7 +269,7 @@ export function WidgetGrid({
               className="widgets-column__add"
               onClick={() => onAddWidget(colIndex)}
               aria-label={`Adicionar widget na coluna ${colIndex + 1}`}
-              title="Adicionar widget"
+              title="Adicionar widgets"
             >
               <span aria-hidden="true">+</span>
             </button>

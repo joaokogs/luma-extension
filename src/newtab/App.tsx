@@ -415,17 +415,15 @@ export function App() {
         </button>
 
         <div className={`app-fab-menu ${menuOpen ? 'app-fab-menu--open' : ''}`}>
-          {editModeEnabled && (
             <button
               className="app-fab-menu__item"
               onClick={() => { setShowWidgetToolbar(true); setMenuOpen(false); }}
-              aria-label="Adicionar widget"
-              title="Adicionar widget"
+              aria-label="Adicionar widgets"
+              title="Adicionar widgets"
             >
               <Icon name="plus" size={18} />
-              <span>Adicionar widget</span>
+              <span>Widgets</span>
             </button>
-          )}
           <button
             className="app-fab-menu__item"
             onClick={() => { setShowSettings(true); setMenuOpen(false); }}
@@ -515,7 +513,6 @@ export function App() {
           onAddWidget={handleAddWidgetFromToolbar}
           onCityChange={handleToolbarCityChange}
           onClose={() => setShowWidgetToolbar(false)}
-          editMode={editModeEnabled}
         />
       )}
 

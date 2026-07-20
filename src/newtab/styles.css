@@ -4,7 +4,7 @@
   /* Light theme (default) */
   --bg-body: #f8fafc;
   --bg-surface: rgba(255, 255, 255, 0.78);
-  --bg-surface-solid: rgba(255, 255, 255, 0.92);
+  --bg-surface-solid: #ffffff;
   --bg-surface-hover: rgba(255, 255, 255, 0.9);
   --bg-hover: rgba(255, 255, 255, 0.55);
   --bg-active: rgba(255, 255, 255, 0.65);
@@ -30,7 +30,7 @@
 :root.theme-dark {
   --bg-body: #0f172a;
   --bg-surface: rgba(30, 41, 59, 0.72);
-  --bg-surface-solid: rgba(30, 41, 59, 0.92);
+  --bg-surface-solid: #1e293b;
   --bg-surface-hover: rgba(51, 65, 85, 0.85);
   --bg-hover: rgba(255, 255, 255, 0.08);
   --bg-active: rgba(255, 255, 255, 0.12);
@@ -228,12 +228,10 @@ body {
   z-index: 1000;
   min-width: 150px;
   padding: 6px;
-  background: var(--bg-surface);
+  background: var(--bg-surface-solid);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -359,12 +357,10 @@ body {
   left: 0;
   min-width: 185px;
   padding: 6px;
-  background: var(--bg-surface);
+  background: var(--bg-surface-solid);
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -427,12 +423,10 @@ body {
   left: 0;
   right: 0;
   padding: 6px;
-  background: var(--bg-surface);
+  background: var(--bg-surface-solid);
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -650,11 +644,9 @@ body {
   padding: 10px 16px;
   border-radius: var(--radius-lg);
   color: var(--text-primary);
-  background: var(--bg-surface);
+  background: var(--bg-surface-solid);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   font-size: 0.85rem;
   font-weight: 500;
   white-space: nowrap;
@@ -909,12 +901,10 @@ body {
   z-index: 1000;
   min-width: 170px;
   padding: 6px;
-  background: var(--bg-surface);
+  background: var(--bg-surface-solid);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1074,12 +1064,10 @@ body {
   z-index: 1000;
   min-width: 150px;
   padding: 6px;
-  background: var(--bg-surface);
+  background: var(--bg-surface-solid);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 2px;

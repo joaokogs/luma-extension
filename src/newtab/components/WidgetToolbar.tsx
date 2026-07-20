@@ -30,7 +30,6 @@ interface WidgetToolbarProps {
   onAddWidget: (type: WidgetType) => void;
   onCityChange: (city: string) => void;
   onClose: () => void;
-  editMode?: boolean;
 }
 
 export function WidgetToolbar({
@@ -39,8 +38,7 @@ export function WidgetToolbar({
   onToggleWidget,
   onAddWidget,
   onCityChange,
-  onClose,
-  editMode = true
+  onClose
 }: WidgetToolbarProps) {
   const [cityInput, setCityInput] = useState('');
   const panelRef = useRef<HTMLDivElement>(null);
@@ -96,7 +94,7 @@ export function WidgetToolbar({
                 <span>{option.label}</span>
               </div>
 
-              {option.hasAdd && editMode && (
+              {option.hasAdd && (
                 <button
                   className="widget-toolbar__add-btn"
                   onClick={() => onAddWidget(option.type as WidgetType)}
@@ -105,7 +103,7 @@ export function WidgetToolbar({
                 </button>
               )}
 
-              {option.hasToggle && editMode && (
+              {option.hasToggle && (
                 <label className="widget-toolbar__toggle">
                   <input
                     type="checkbox"
