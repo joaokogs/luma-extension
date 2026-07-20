@@ -11,6 +11,7 @@ import { useColumnCount } from '../hooks/useColumnCount';
 
 interface WidgetGridProps {
   widgets: Widget[];
+  openInNewTab: boolean;
   onReorder: (widgets: Widget[]) => void;
   onEditWidget: (widget: Widget) => void;
   onDeleteWidget: (widgetId: string) => void;
@@ -37,6 +38,7 @@ interface LinkDragState {
 
 export function WidgetGrid({
   widgets,
+  openInNewTab,
   onReorder,
   onEditWidget,
   onDeleteWidget,
@@ -253,6 +255,7 @@ export function WidgetGrid({
                   <WidgetContent
                     widget={widget}
                     linkDrag={linkDrag}
+                    openInNewTab={openInNewTab}
                     onDeleteLink={isEditing ? (linkId) => onDeleteLink(widget.id, linkId) : undefined}
                     onEditLink={isEditing && onEditLink ? (linkId) => onEditLink(widget.id, linkId) : undefined}
                     onLinkDragStart={isEditing ? (e, linkId) => handleLinkDragStart(e, linkId, widget.id) : undefined}
@@ -287,6 +290,7 @@ function DropIndicator() {
 function WidgetContent({
   widget,
   linkDrag,
+  openInNewTab,
   onDeleteLink,
   onEditLink,
   onLinkDragStart,
@@ -295,6 +299,7 @@ function WidgetContent({
 }: {
   widget: Widget;
   linkDrag: LinkDragState;
+  openInNewTab: boolean;
   onDeleteLink?: (linkId: string) => void;
   onEditLink?: (linkId: string) => void;
   onLinkDragStart?: (e: DragEvent, linkId: string) => void;
@@ -307,6 +312,7 @@ function WidgetContent({
         <LinksWidgetView
           widget={widget}
           linkDrag={linkDrag}
+          openInNewTab={openInNewTab}
           onDeleteLink={onDeleteLink}
           onEditLink={onEditLink}
           onLinkDragStart={onLinkDragStart}

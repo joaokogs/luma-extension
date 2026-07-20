@@ -68,6 +68,7 @@ export interface AppSettings {
   lastBoardId?: string;
   topWidgets?: TopWidgetConfig[];
   editMode?: boolean;
+  openInNewTab?: boolean;
   recentSearches?: string[];
 }
 
@@ -167,7 +168,8 @@ export function getDefaultData(): AppData {
         { type: 'focus', targetMinutes: 240 },
         { type: 'clock' }
       ],
-      editMode: true
+      editMode: true,
+      openInNewTab: true
     },
     installedAt: Date.now()
   };

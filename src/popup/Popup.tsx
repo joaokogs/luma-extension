@@ -247,6 +247,7 @@ export function Popup() {
               <LinkRow
                 key={link.id}
                 link={link}
+                data={data}
                 onEdit={editModeEnabled ? () => setDialog({ edit: link.id }) : undefined}
                 onDelete={editModeEnabled ? () => handleDeleteLink(link.id) : undefined}
               />
@@ -307,10 +308,12 @@ export function Popup() {
 
 function LinkRow({
   link,
+  data,
   onEdit,
   onDelete
 }: {
   link: LinkItem;
+  data?: AppData | null;
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
@@ -336,7 +339,7 @@ function LinkRow({
       </span>
       <a
         href={link.url}
-        target="_blank"
+        target={data?.settings.openInNewTab !== false ? '_blank' : '_self'}
         rel="noopener noreferrer"
         className="popup__link-text"
         title={link.title}

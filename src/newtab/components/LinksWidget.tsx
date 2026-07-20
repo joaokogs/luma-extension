@@ -13,6 +13,7 @@ interface LinkDragState {
 interface LinksWidgetProps {
   widget: LinksWidget;
   linkDrag: LinkDragState;
+  openInNewTab?: boolean;
   onDeleteLink?: (linkId: string) => void;
   onEditLink?: (linkId: string) => void;
   onLinkDragStart?: (e: DragEvent, linkId: string) => void;
@@ -28,6 +29,7 @@ interface DropTarget {
 export function LinksWidgetView({
   widget,
   linkDrag,
+  openInNewTab = true,
   onDeleteLink,
   onEditLink,
   onLinkDragStart,
@@ -125,8 +127,9 @@ export function LinksWidgetView({
           key={link.id}
           link={link}
           className={getItemDropClasses(link.id)}
-          isDragging={linkDrag.linkId === link.id}
-          onDelete={onDeleteLink}
+            isDragging={linkDrag.linkId === link.id}
+            openInNewTab={openInNewTab}
+            onDelete={onDeleteLink}
           onEdit={onEditLink}
           onDragStart={onLinkDragStart}
           onDragEnd={onLinkDragEnd}
@@ -140,6 +143,7 @@ function LinkRow({
   link,
   className,
   isDragging,
+  openInNewTab = true,
   onDelete,
   onEdit,
   onDragStart,
@@ -148,6 +152,7 @@ function LinkRow({
   link: LinkItem;
   className?: string;
   isDragging?: boolean;
+  openInNewTab?: boolean;
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDragStart?: (e: DragEvent, linkId: string) => void;
@@ -229,7 +234,7 @@ function LinkRow({
     >
       <a
         href={link.url}
-        target="_blank"
+        target={openInNewTab ? '_blank' : '_self'}
         rel="noopener noreferrer"
         className="links-widget__link"
         aria-label={`Abrir ${link.title}`}

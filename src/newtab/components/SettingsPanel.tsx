@@ -49,6 +49,21 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport 
       </div>
 
       <div className="settings-panel__section">
+        <label className="settings-panel__label">Abrir em uma nova guia</label>
+        <div className="settings-panel__toggle-row">
+          <span className="settings-panel__toggle-desc">Abrir links e buscas em uma nova guia</span>
+          <label className="widget-toolbar__toggle">
+            <input
+              type="checkbox"
+              checked={settings.openInNewTab !== false}
+              onChange={() => onChange({ openInNewTab: settings.openInNewTab === false ? true : false })}
+            />
+            <span className="widget-toolbar__toggle-slider" />
+          </label>
+        </div>
+      </div>
+
+      <div className="settings-panel__section">
         <label className="settings-panel__label">Backup</label>
         <div className="backup-actions">
           <button className="btn btn--secondary" onClick={onExport}>

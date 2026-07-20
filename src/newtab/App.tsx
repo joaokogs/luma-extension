@@ -355,11 +355,12 @@ export function App() {
   const handleSearch = (query: string) => {
     const q = query.trim();
     if (!q) return;
+    const target = data?.settings.openInNewTab !== false ? '_blank' : '_self';
     if (looksLikeUrl(q)) {
-      window.open(ensureProtocol(q), '_blank');
+      window.open(ensureProtocol(q), target);
     } else {
       const engineUrl = SEARCH_ENGINES.find((e) => e.id === searchEngine)?.url || SEARCH_ENGINES[0].url;
-      window.open(`${engineUrl}${encodeURIComponent(q)}`, '_blank');
+      window.open(`${engineUrl}${encodeURIComponent(q)}`, target);
     }
     setData((prev) => (prev ? addRecentSearch(prev, q) : prev));
   };
@@ -391,7 +392,10 @@ export function App() {
             searchEngine={searchEngine}
             onEngineChange={handleEngineChange}
             onSearch={handleSearch}
-            onOpenLink={(url) => window.open(ensureProtocol(url), '_blank')}
+            onOpenLink={(url) => {
+              const target = data?.settings.openInNewTab !== false ? '_blank' : '_self';
+              window.open(ensureProtocol(url), target);
+            }}
             recentSearches={data.settings.recentSearches || []}
             linkSuggestions={linkSuggestions}
           />
@@ -448,6 +452,7 @@ export function App() {
         {!searchQuery.trim() && (
           <WidgetGrid
             widgets={widgets}
+            openInNewTab={data.settings.openInNewTab !== false}
             onReorder={handleReorder}
             onEditWidget={setEditingWidget}
             onDeleteWidget={handleDeleteWidget}
