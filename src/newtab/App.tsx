@@ -341,19 +341,15 @@ export function App() {
     }
   };
 
-  const displayedWidgets = useMemo(() => {
-    if (!searchQuery.trim()) return widgets;
+  const linkSuggestions = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
 
-    const q = searchQuery.toLowerCase();
     return widgets
-      .filter((w) => w.type === 'links')
-      .map((w) => {
-        const matched = w.items.filter(
-          (i) => i.title.toLowerCase().includes(q) || i.url.toLowerCase().includes(q)
-        );
-        return matched.length > 0 ? { ...w, items: matched } as Widget : null;
-      })
-      .filter((w): w is Widget => w !== null);
+      .filter((widget) => widget.type === 'links')
+      .flatMap((widget) => widget.items)
+      .filter((link) => link.title.toLowerCase().includes(query) || link.url.toLowerCase().includes(query))
+      .slice(0, 3);
   }, [widgets, searchQuery]);
 
   const handleSearch = (query: string) => {
@@ -367,8 +363,6 @@ export function App() {
     }
     setData((prev) => (prev ? addRecentSearch(prev, q) : prev));
   };
-
-  const hasNoResults = searchQuery.trim() && displayedWidgets.length === 0;
 
   return (
     <div
@@ -397,7 +391,9 @@ export function App() {
             searchEngine={searchEngine}
             onEngineChange={handleEngineChange}
             onSearch={handleSearch}
+            onOpenLink={(url) => window.open(ensureProtocol(url), '_blank')}
             recentSearches={data.settings.recentSearches || []}
+            linkSuggestions={linkSuggestions}
           />
         )}
 
@@ -449,17 +445,9 @@ export function App() {
       </div>
 
       <main className="app-content">
-        {hasNoResults ? (
-          <div className="empty-state">
-            <h3 className="empty-state__title">Nenhum resultado</h3>
-            <p className="empty-state__description">Nenhum link corresponde à sua busca.</p>
-            <button className="empty-state__action" onClick={() => setSearchQuery('')}>
-              Limpar busca
-            </button>
-          </div>
-        ) : (
+        {!searchQuery.trim() && (
           <WidgetGrid
-            widgets={displayedWidgets}
+            widgets={widgets}
             onReorder={handleReorder}
             onEditWidget={setEditingWidget}
             onDeleteWidget={handleDeleteWidget}

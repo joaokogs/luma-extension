@@ -454,6 +454,24 @@ body {
   width: 100%;
 }
 
+.search-suggestions__section {
+  padding: 6px 10px 2px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.search-suggestions__section--links {
+  margin: 2px 4px 0;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+}
+
 .search-suggestions__item:hover,
 .search-suggestions__item--highlighted {
   background: var(--bg-hover);

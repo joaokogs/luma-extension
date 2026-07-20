@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Icon } from './Icon';
 import { SEARCH_ENGINES } from '@shared/types';
-import type { SearchEngine } from '@shared/types';
+import type { LinkItem, SearchEngine } from '@shared/types';
+
+type DropdownItem =
+  | { type: 'link'; text: string; link: LinkItem }
+  | { type: 'suggestion' | 'recent'; text: string };
 
 interface SearchBarProps {
   searchQuery: string;
@@ -9,7 +13,9 @@ interface SearchBarProps {
   searchEngine: SearchEngine;
   onEngineChange: (engine: SearchEngine) => void;
   onSearch: (query: string) => void;
+  onOpenLink: (url: string) => void;
   recentSearches: string[];
+  linkSuggestions: LinkItem[];
 }
 
 export function SearchBar({
@@ -18,7 +24,9 @@ export function SearchBar({
   searchEngine,
   onEngineChange,
   onSearch,
+  onOpenLink,
   recentSearches,
+  linkSuggestions,
 }: SearchBarProps) {
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
@@ -52,30 +60,21 @@ export function SearchBar({
   };
 
   const dropdownItems = useMemo(() => {
-    const items: { type: 'suggestion' | 'recent'; text: string }[] = [];
-    for (const s of webSuggestions) {
-      items.push({ type: 'suggestion', text: s });
-      if (items.length >= 5) break;
+    const links: DropdownItem[] = linkSuggestions.map((link) => ({
+      type: 'link',
+      text: link.title,
+      link,
+    }));
+
+    if (searchQuery.trim()) {
+      return [
+        ...links,
+        ...webSuggestions.slice(0, 5).map((text) => ({ type: 'suggestion' as const, text })),
+      ];
     }
-    const remaining = 5 - items.length;
-    if (remaining > 0 && !searchQuery.trim()) {
-      for (const r of recentSearches) {
-        if (!items.some((i) => i.text === r)) {
-          items.push({ type: 'recent', text: r });
-          if (items.length >= 5) break;
-        }
-      }
-    } else if (remaining > 0) {
-      const q = searchQuery.toLowerCase();
-      for (const r of recentSearches) {
-        if (r.toLowerCase().includes(q) && !items.some((i) => i.text === r)) {
-          items.push({ type: 'recent', text: r });
-          if (items.length >= 5) break;
-        }
-      }
-    }
-    return items;
-  }, [webSuggestions, recentSearches, searchQuery]);
+
+    return recentSearches.slice(0, 5).map((text) => ({ type: 'recent' as const, text }));
+  }, [linkSuggestions, webSuggestions, recentSearches, searchQuery]);
 
   const hasDropdown = open && dropdownItems.length > 0;
 
@@ -111,9 +110,13 @@ export function SearchBar({
     setOpen(true);
   };
 
-  const handleSelect = (text: string) => {
-    onSearchQueryChange(text);
-    onSearch(text);
+  const handleSelect = (item: DropdownItem) => {
+    if (item.type === 'link') {
+      onOpenLink(item.link.url);
+    } else {
+      onSearchQueryChange(item.text);
+      onSearch(item.text);
+    }
     setOpen(false);
   };
 
@@ -131,7 +134,7 @@ export function SearchBar({
         e.preventDefault();
         const item = dropdownItems[highlighted];
         if (item) {
-          handleSelect(item.text);
+          handleSelect(item);
           return;
         }
       } else if (e.key === 'Escape') {
@@ -203,21 +206,28 @@ export function SearchBar({
       {hasDropdown && (
         <ul className="search-suggestions" role="listbox">
           {dropdownItems.map((item, index) => (
-            <li
-              key={`${item.type}-${item.text}`}
-              className={`search-suggestions__item ${index === highlighted ? 'search-suggestions__item--highlighted' : ''}`}
-              onClick={() => handleSelect(item.text)}
-              onMouseEnter={() => setHighlighted(index)}
-              role="option"
-              aria-selected={index === highlighted}
-            >
-              <Icon
-                name={item.type === 'recent' ? 'clock' : 'globe'}
-                size={14}
-                className="search-suggestions__icon"
-              />
-              <span className="search-suggestions__text">{item.text}</span>
-            </li>
+            <>
+              {(index === 0 || item.type !== dropdownItems[index - 1]?.type) && (
+                <li className={`search-suggestions__section ${item.type === 'link' ? 'search-suggestions__section--links' : ''}`} role="presentation">
+                  {item.type === 'link' ? 'Links' : item.type === 'suggestion' ? 'Recomendados da web' : 'Buscas recentes'}
+                </li>
+              )}
+              <li
+                key={`${item.type}-${item.text}`}
+                className={`search-suggestions__item ${index === highlighted ? 'search-suggestions__item--highlighted' : ''}`}
+                onClick={() => handleSelect(item)}
+                onMouseEnter={() => setHighlighted(index)}
+                role="option"
+                aria-selected={index === highlighted}
+              >
+                <Icon
+                  name={item.type === 'link' ? 'bookmark' : item.type === 'recent' ? 'clock' : 'globe'}
+                  size={14}
+                  className="search-suggestions__icon"
+                />
+                <span className="search-suggestions__text">{item.text}</span>
+              </li>
+            </>
           ))}
         </ul>
       )}
