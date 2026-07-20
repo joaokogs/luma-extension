@@ -18,12 +18,14 @@ interface WidgetGridProps {
   onEditLink?: (widgetId: string, linkId: string) => void;
   onAddLink?: (widget: Widget) => void;
   onResizeWidget?: (widgetId: string, height: number) => void;
+  onAddWidget?: (column: number) => void;
   isEditing?: boolean;
 }
 
 interface DragTarget {
   widgetId: string | null;
   col: number | null;
+  targetId: string | null;
   position: 'before' | 'after' | 'into' | null;
 }
 
@@ -36,11 +38,12 @@ export function WidgetGrid({
   onEditLink,
   onAddLink,
   onResizeWidget,
+  onAddWidget,
   isEditing = true
 }: WidgetGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const columnCount = useColumnCount(gridRef);
-  const [drag, setDrag] = useState<DragTarget>({ widgetId: null, col: null, position: null });
+  const [drag, setDrag] = useState<DragTarget>({ widgetId: null, col: null, targetId: null, position: null });
 
   const columns = useMemo(() => {
     const cols: Widget[][] = Array.from({ length: columnCount }, () => []);
@@ -55,7 +58,7 @@ export function WidgetGrid({
   }, [widgets, columnCount]);
 
   const handleDragStart = (e: DragEvent, id: string) => {
-    setDrag({ widgetId: id, col: null, position: null });
+    setDrag({ widgetId: id, col: null, targetId: null, position: null });
     e.dataTransfer?.setData('text/plain', id);
     e.dataTransfer?.setDragImage(new Image(), 0, 0);
   };
@@ -64,20 +67,36 @@ export function WidgetGrid({
     e.preventDefault();
     e.stopPropagation();
     if (!drag.widgetId || drag.widgetId === widget.id) {
-      setDrag((prev) => ({ ...prev, col: null, position: null }));
+      setDrag((prev) => ({ ...prev, col: null, targetId: null, position: null }));
       return;
     }
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
     const position = e.clientY < midY ? 'before' : 'after';
     const col = Math.min(Math.max(widget.col ?? 0, 0), columnCount - 1);
-    setDrag({ widgetId: drag.widgetId, col, position });
+    setDrag({ widgetId: drag.widgetId, col, targetId: widget.id, position });
   };
 
   const handleDragOverColumn = (e: DragEvent, colIndex: number) => {
     e.preventDefault();
     if (!drag.widgetId) return;
-    setDrag({ widgetId: drag.widgetId, col: colIndex, position: 'into' });
+
+    const cards = Array.from((e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[data-widget-id]'))
+      .filter((card) => card.dataset.widgetId !== drag.widgetId);
+    const nextCard = cards.find((card) => e.clientY < card.getBoundingClientRect().top + card.getBoundingClientRect().height / 2);
+
+    if (nextCard?.dataset.widgetId) {
+      setDrag({ widgetId: drag.widgetId, col: colIndex, targetId: nextCard.dataset.widgetId, position: 'before' });
+      return;
+    }
+
+    const lastCard = cards[cards.length - 1];
+    setDrag({
+      widgetId: drag.widgetId,
+      col: colIndex,
+      targetId: lastCard?.dataset.widgetId ?? null,
+      position: lastCard ? 'after' : 'into'
+    });
   };
 
   const commitReorder = (fn: (byCol: Widget[][]) => void) => {
@@ -87,9 +106,11 @@ export function WidgetGrid({
       const c = Math.min(Math.max(w.col ?? 0, 0), columnCount - 1);
       byCol[c].push(w);
     }
-    fn(byCol);
     for (const col of byCol) {
       col.sort((a, b) => a.order - b.order);
+    }
+    fn(byCol);
+    for (const col of byCol) {
       col.forEach((w, i) => { w.order = i; });
     }
     const result = byCol.flat();
@@ -100,14 +121,12 @@ export function WidgetGrid({
     e.preventDefault();
     e.stopPropagation();
     if (!drag.widgetId || drag.widgetId === targetWidget.id) {
-      setDrag({ widgetId: null, col: null, position: null });
+      setDrag({ widgetId: null, col: null, targetId: null, position: null });
       return;
     }
 
     const targetCol = Math.min(Math.max(targetWidget.col ?? 0, 0), columnCount - 1);
-    const colWidgets = columns[targetCol];
-    const targetIndex = colWidgets.findIndex((w) => w.id === targetWidget.id);
-    let insertIndex = drag.position === 'after' ? targetIndex + 1 : targetIndex;
+    const position = drag.position;
 
     commitReorder((byCol) => {
       const moved = byCol.flat().find((w) => w.id === drag.widgetId);
@@ -118,18 +137,24 @@ export function WidgetGrid({
         if (idx !== -1) { col.splice(idx, 1); break; }
       }
       moved.col = targetCol;
-      // clamp insertIndex
-      if (insertIndex > byCol[targetCol].length) insertIndex = byCol[targetCol].length;
+      const targetIndex = byCol[targetCol].findIndex((w) => w.id === targetWidget.id);
+      const insertIndex = position === 'after' ? targetIndex + 1 : targetIndex;
       byCol[targetCol].splice(insertIndex, 0, moved);
     });
 
-    setDrag({ widgetId: null, col: null, position: null });
+    setDrag({ widgetId: null, col: null, targetId: null, position: null });
   };
 
   const handleDropOnColumn = (e: DragEvent, colIndex: number) => {
     e.preventDefault();
     if (!drag.widgetId) {
-      setDrag({ widgetId: null, col: null, position: null });
+      setDrag({ widgetId: null, col: null, targetId: null, position: null });
+      return;
+    }
+
+    const targetWidget = drag.targetId ? columns[colIndex].find((widget) => widget.id === drag.targetId) : undefined;
+    if (targetWidget && drag.position !== 'into') {
+      handleDropOnWidget(e, targetWidget);
       return;
     }
 
@@ -144,23 +169,12 @@ export function WidgetGrid({
       byCol[colIndex].push(moved);
     });
 
-    setDrag({ widgetId: null, col: null, position: null });
+    setDrag({ widgetId: null, col: null, targetId: null, position: null });
   };
 
   const handleDragEnd = () => {
-    setDrag({ widgetId: null, col: null, position: null });
+    setDrag({ widgetId: null, col: null, targetId: null, position: null });
   };
-
-  if (widgets.length === 0) {
-    return (
-      <div className="widgets-grid" ref={gridRef}>
-        <div className="empty-state">
-          <h3 className="empty-state__title">Nenhum widget</h3>
-          <p className="empty-state__description">Adicione seu primeiro widget para começar a montar o layout.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="widgets-grid" ref={gridRef}>
@@ -173,7 +187,7 @@ export function WidgetGrid({
         >
           {colWidgets.length === 0 && drag.col === colIndex && drag.position === 'into' && <DropIndicator />}
           {colWidgets.map((widget) => {
-            const isTarget = drag.widgetId && drag.widgetId !== widget.id && drag.col === (widget.col ?? 0);
+            const isTarget = drag.widgetId && drag.targetId === widget.id && drag.col === (widget.col ?? 0);
             return (
               <div key={widget.id} className="widget-drop-wrapper">
                 {isTarget && drag.position === 'before' && <DropIndicator />}
@@ -199,6 +213,16 @@ export function WidgetGrid({
               </div>
             );
           })}
+          {isEditing && onAddWidget && (
+            <button
+              className="widgets-column__add"
+              onClick={() => onAddWidget(colIndex)}
+              aria-label={`Adicionar widget na coluna ${colIndex + 1}`}
+              title="Adicionar widget"
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+          )}
         </div>
       ))}
     </div>

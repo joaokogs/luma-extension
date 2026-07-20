@@ -15,16 +15,17 @@ const WIDGET_TYPES: { type: WidgetType; label: string; icon: IconName }[] = [
 
 interface WidgetEditorProps {
   widget?: Widget | null;
+  initialColumn?: number;
   onSave: (widget: Widget) => void;
   onClose: () => void;
 }
 
-export function WidgetEditor({ widget, onSave, onClose }: WidgetEditorProps) {
+export function WidgetEditor({ widget, initialColumn = 0, onSave, onClose }: WidgetEditorProps) {
   const isEdit = !!widget;
   const [type, setType] = useState<WidgetType>(widget?.type || 'links');
   const [title, setTitle] = useState(widget?.title || '');
   const [colSpan, setColSpan] = useState(widget?.colSpan || 1);
-  const [col, setCol] = useState(widget?.col ?? 0);
+  const [col, setCol] = useState(widget?.col ?? initialColumn);
   const [height, setHeight] = useState<number | ''>(widget?.height ?? '');
   const [city, setCity] = useState((widget?.type === 'weather' && widget.city) || '');
   const [timezone, setTimezone] = useState((widget?.type === 'clock' && widget.timezone) || '');

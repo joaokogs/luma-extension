@@ -14,7 +14,6 @@ interface WidgetOption {
 }
 
 const WIDGET_OPTIONS: WidgetOption[] = [
-  { type: 'board', label: 'Board', icon: 'grid', hasAdd: true },
   { type: 'notes', label: 'Notes', icon: 'edit', hasAdd: true },
   { type: 'calendar', label: 'Calendar', icon: 'grid', hasAdd: true },
   { type: 'pomodoro', label: 'Pomodoro', icon: 'clock', hasAdd: true },

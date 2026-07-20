@@ -58,6 +58,7 @@ export function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showWidgetToolbar, setShowWidgetToolbar] = useState(false);
   const [isAddingWidget, setIsAddingWidget] = useState(false);
+  const [newWidgetColumn, setNewWidgetColumn] = useState(0);
   const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const [addingLinkWidget, setAddingLinkWidget] = useState<Widget | null>(null);
   const [editingLink, setEditingLink] = useState<{ widgetId: string; linkId: string } | null>(null);
@@ -159,6 +160,11 @@ export function App() {
     if (!activeBoardId) return;
     setData((prev) => (prev && activeBoardId ? addWidget(prev, activeBoardId, widget) : prev));
     setIsAddingWidget(false);
+  };
+
+  const handleStartAddWidget = (column: number) => {
+    setNewWidgetColumn(column);
+    setIsAddingWidget(true);
   };
 
   const handleUpdateWidget = (widget: Widget) => {
@@ -424,6 +430,7 @@ export function App() {
             onEditLink={handleEditLink}
             onAddLink={setAddingLinkWidget}
             onResizeWidget={handleResizeWidget}
+            onAddWidget={handleStartAddWidget}
             isEditing={!searchQuery.trim()}
           />
         )}
@@ -431,6 +438,7 @@ export function App() {
 
       {isAddingWidget && (
         <WidgetEditor
+          initialColumn={newWidgetColumn}
           onSave={handleAddWidget}
           onClose={() => setIsAddingWidget(false)}
         />
