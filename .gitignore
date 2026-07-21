@@ -7,3 +7,4 @@ Thumbs.db
 .env.local
 *.local
 .vscode/
+*.zip
