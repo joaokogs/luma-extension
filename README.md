@@ -1,6 +1,6 @@
-# Boards New Tab
+# Luma
 
-Uma extensão Firefox que substitui a nova aba por uma dashboard visual, rápida e elegante para organizar links em boards.
+Luma — uma extensão Firefox que substitui a nova aba por uma dashboard visual, rápida e elegante para organizar links em boards.
 
 ## Stack
 

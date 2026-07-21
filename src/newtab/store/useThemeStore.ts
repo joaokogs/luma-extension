@@ -49,7 +49,7 @@ export const useThemeStore = create<ThemeState>()(
       }
     }),
     {
-      name: 'boards-newtab-theme'
+      name: 'luma-theme'
     }
   )
 );

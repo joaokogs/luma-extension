@@ -1,5 +1,5 @@
 /**
- * Shared type definitions for the Boards New Tab extension.
+ * Shared type definitions for the Luma extension.
  * Keep this file dependency-free so it can be imported anywhere.
  */
 
