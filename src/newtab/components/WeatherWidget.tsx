@@ -12,12 +12,29 @@ interface WeatherData {
   isGeo: boolean;
 }
 
+const weatherCache = new Map<string, { data: WeatherData; expiry: number }>();
+const WEATHER_CACHE_TTL = 300_000;
+
+function getCacheKey(city: string): string {
+  return city || '__geo';
+}
+
 export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const cacheKey = getCacheKey(city);
+    const cached = weatherCache.get(cacheKey);
+    if (cached && cached.expiry > Date.now()) {
+      setWeather(cached.data);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    const abort = new AbortController();
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -29,15 +46,13 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
         let cityName: string;
         let isGeo = false;
 
-        // 1. If city is explicitly set, use it directly (skip geolocation)
         if (city) {
-          const geo = await geocodeCity(city);
+          const geo = await geocodeCity(city, abort.signal);
           if (!geo) throw new Error('Cidade não encontrada');
           lat = geo.lat;
           lon = geo.lon;
           cityName = geo.name;
         }
-        // 2. Try geolocation
         else if (navigator.geolocation) {
           try {
             const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -50,8 +65,7 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
             lat = pos.coords.latitude;
             lon = pos.coords.longitude;
             isGeo = true;
-            // reverse geocode
-            cityName = await reverseGeocode(lat, lon);
+            cityName = await reverseGeocode(lat, lon, abort.signal);
           } catch {
             throw new Error('Localização não disponível');
           }
@@ -59,9 +73,9 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
           throw new Error('Localização não disponível');
         }
 
-        // 2. Fetch weather
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`,
+          { signal: abort.signal }
         );
         if (!response.ok) throw new Error('Falha ao buscar clima');
         const data = await response.json();
@@ -69,14 +83,17 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
         const temp = data.current_weather?.temperature;
 
         if (!cancelled) {
-          setWeather({
+          const w: WeatherData = {
             temp: Math.round(temp ?? 0),
             condition: weatherCodeToCondition(code),
             cityName,
             isGeo
-          });
+          };
+          weatherCache.set(cacheKey, { data: w, expiry: Date.now() + WEATHER_CACHE_TTL });
+          setWeather(w);
         }
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         if (!cancelled) setError(err instanceof Error ? err.message : 'Erro');
       } finally {
         if (!cancelled) setLoading(false);
@@ -84,7 +101,7 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
     };
 
     load();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; abort.abort(); };
   }, [city]);
 
   if (loading) {
@@ -134,10 +151,11 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
   );
 }
 
-async function reverseGeocode(lat: number, lon: number): Promise<string> {
+async function reverseGeocode(lat: number, lon: number, signal?: AbortSignal): Promise<string> {
   try {
     const response = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`,
+      { signal }
     );
     if (!response.ok) return `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
     const data = await response.json();
@@ -147,10 +165,11 @@ async function reverseGeocode(lat: number, lon: number): Promise<string> {
   }
 }
 
-async function geocodeCity(city: string): Promise<{ lat: number; lon: number; name: string } | null> {
+async function geocodeCity(city: string, signal?: AbortSignal): Promise<{ lat: number; lon: number; name: string } | null> {
   try {
     const response = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`,
+      { signal }
     );
     if (!response.ok) return null;
     const data = await response.json();

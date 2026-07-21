@@ -36,9 +36,10 @@ export function WidgetCard({
   const menuRef = useRef<HTMLDivElement>(null);
   const kebabRef = useRef<HTMLButtonElement>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [tempHeight, setTempHeight] = useState<number | undefined>(undefined);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
-  const resizeStart = useRef({ y: 0, height: 0 });
+  const resizeStart = useRef({ y: 0, baseHeight: 0 });
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -63,12 +64,15 @@ export function WidgetCard({
     const onMouseMove = (e: MouseEvent) => {
       e.preventDefault();
       const diff = e.clientY - resizeStart.current.y;
-      const newHeight = Math.max(120, resizeStart.current.height + diff);
-      onResize?.(newHeight);
+      setTempHeight(Math.max(120, resizeStart.current.baseHeight + diff));
     };
 
     const onMouseUp = () => {
       setIsResizing(false);
+      if (tempHeight !== undefined) {
+        onResize?.(tempHeight);
+        setTempHeight(undefined);
+      }
     };
 
     document.addEventListener('mousemove', onMouseMove);
@@ -77,7 +81,7 @@ export function WidgetCard({
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
-  }, [isResizing]);
+  }, [isResizing, tempHeight]);
 
   const openMenu = () => {
     if (kebabRef.current) {
@@ -93,7 +97,7 @@ export function WidgetCard({
     if (cardRef.current) {
       resizeStart.current = {
         y: e.clientY,
-        height: cardRef.current.getBoundingClientRect().height
+        baseHeight: cardRef.current.getBoundingClientRect().height
       };
     }
     setIsResizing(true);
@@ -131,7 +135,7 @@ export function WidgetCard({
       onContextMenu={handleContextMenu}
       data-widget-id={widget.id}
       data-col-span={widget.colSpan}
-      style={widget.height ? { height: widget.height, flexShrink: 0 } : undefined}
+      style={tempHeight !== undefined ? { height: tempHeight, flexShrink: 0 } : widget.height ? { height: widget.height, flexShrink: 0 } : undefined}
     >
       <div className={`widget-card__header ${widget.type !== 'links' ? 'widget-card__header--actions-only' : ''}`}>
           {widget.type === 'links' && (

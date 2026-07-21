@@ -8,8 +8,16 @@ export function ClockWidgetView({ timezone, label }: { timezone?: string; label?
 
   useEffect(() => {
     setNow(new Date());
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    const msToNextMin = (60 - new Date().getSeconds()) * 1000;
+    const intervalRef: { current: number | null } = { current: null };
+    const timeoutRef = window.setTimeout(() => {
+      setNow(new Date());
+      intervalRef.current = window.setInterval(() => setNow(new Date()), 60000);
+    }, msToNextMin);
+    return () => {
+      clearTimeout(timeoutRef);
+      if (intervalRef.current !== null) clearInterval(intervalRef.current);
+    };
   }, []);
 
   const options: Intl.DateTimeFormatOptions = {

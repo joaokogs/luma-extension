@@ -71,15 +71,16 @@ function extractDominantColorFromImage(imageUrl: string): Promise<{ primaryColor
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      const SIZE = 64;
+      canvas.width = SIZE;
+      canvas.height = SIZE;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         resolve({ primaryColor: '#4f46e5', boardColor: '#ffffff' });
         return;
       }
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      const imageData = ctx.getImageData(0, 0, SIZE, SIZE);
       const data = imageData.data;
 
       const colorCounts: Record<string, number> = {};

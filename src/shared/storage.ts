@@ -62,6 +62,21 @@ export function getFaviconUrl(url: string): string {
   }
 }
 
+function updateBoard(data: AppData, boardId: string, fn: (board: Board) => Board): AppData {
+  return {
+    ...data,
+    boards: data.boards.map((b) => (b.id === boardId ? fn(b) : b))
+  };
+}
+
+function updateWidgetInBoard(data: AppData, boardId: string, widgetId: string, fn: (widget: Widget) => Widget): AppData {
+  return updateBoard(data, boardId, (board) => ({
+    ...board,
+    widgets: board.widgets.map((w) => (w.id === widgetId ? fn(w) : w)),
+    updatedAt: Date.now()
+  }));
+}
+
 // Boards
 export function createBoard(title: string): Board {
   const now = Date.now();
@@ -198,41 +213,22 @@ function defaultWidgetTitle(type: WidgetType): string {
 }
 
 export function addWidget(data: AppData, boardId: string, widget: Widget): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) => {
-      if (b.id !== boardId) return b;
-      const maxOrder = b.widgets.reduce((max, w) => Math.max(max, w.order), -1);
-      const placed = { ...widget, order: maxOrder + 1 };
-      return { ...b, widgets: [...b.widgets, placed], updatedAt: Date.now() };
-    })
-  };
+  return updateBoard(data, boardId, (board) => {
+    const maxOrder = board.widgets.reduce((max, w) => Math.max(max, w.order), -1);
+    return { ...board, widgets: [...board.widgets, { ...widget, order: maxOrder + 1 }], updatedAt: Date.now() };
+  });
 }
 
 export function deleteWidget(data: AppData, boardId: string, widgetId: string): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? { ...b, widgets: b.widgets.filter((w) => w.id !== widgetId), updatedAt: Date.now() }
-        : b
-    )
-  };
+  return updateBoard(data, boardId, (board) => ({
+    ...board,
+    widgets: board.widgets.filter((w) => w.id !== widgetId),
+    updatedAt: Date.now()
+  }));
 }
 
 export function updateWidget(data: AppData, boardId: string, widgetId: string, updates: Partial<Omit<Widget, 'id' | 'type'>> & { title?: string; colSpan?: number; order?: number; height?: number; col?: number }): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) => (w.id === widgetId ? { ...w, ...updates, updatedAt: Date.now() } : w)),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) => ({ ...w, ...updates }));
 }
 
 export function moveWidgetOrder(data: AppData, boardId: string, fromIndex: number, toIndex: number): AppData {
@@ -275,39 +271,15 @@ export function createLink(title: string, url: string, icon?: string | null): Li
 }
 
 export function addLink(data: AppData, boardId: string, widgetId: string, link: LinkItem): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'links' ? { ...w, items: [...w.items, link] } : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'links' ? { ...w, items: [...w.items, link] } : w
+  );
 }
 
 export function deleteLink(data: AppData, boardId: string, widgetId: string, linkId: string): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'links'
-                ? { ...w, items: w.items.filter((l) => l.id !== linkId) }
-                : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'links' ? { ...w, items: w.items.filter((l) => l.id !== linkId) } : w
+  );
 }
 
 export function updateLink(
@@ -317,22 +289,11 @@ export function updateLink(
   linkId: string,
   updates: Partial<LinkItem>
 ): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'links'
-                ? { ...w, items: w.items.map((l) => (l.id === linkId ? { ...l, ...updates } : l)) }
-                : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'links'
+      ? { ...w, items: w.items.map((l) => (l.id === linkId ? { ...l, ...updates } : l)) }
+      : w
+  );
 }
 
 export function searchLinks(data: AppData, query: string): LinkItem[] {
@@ -420,39 +381,15 @@ export function createTodoItem(text: string): TodoItem {
 }
 
 export function addTodoItem(data: AppData, boardId: string, widgetId: string, todo: TodoItem): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'todo' ? { ...w, items: [...w.items, todo] } : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'todo' ? { ...w, items: [...w.items, todo] } : w
+  );
 }
 
 export function deleteTodoItem(data: AppData, boardId: string, widgetId: string, todoId: string): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'todo'
-                ? { ...w, items: w.items.filter((t) => t.id !== todoId) }
-                : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'todo' ? { ...w, items: w.items.filter((t) => t.id !== todoId) } : w
+  );
 }
 
 export function updateTodoItem(
@@ -462,46 +399,19 @@ export function updateTodoItem(
   todoId: string,
   updates: Partial<TodoItem>
 ): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'todo'
-                ? { ...w, items: w.items.map((t) => (t.id === todoId ? { ...t, ...updates } : t)) }
-                : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'todo'
+      ? { ...w, items: w.items.map((t) => (t.id === todoId ? { ...t, ...updates } : t)) }
+      : w
+  );
 }
 
 export function toggleTodoItem(data: AppData, boardId: string, widgetId: string, todoId: string): AppData {
-  return {
-    ...data,
-    boards: data.boards.map((b) =>
-      b.id === boardId
-        ? {
-            ...b,
-            widgets: b.widgets.map((w) =>
-              w.id === widgetId && w.type === 'todo'
-                ? {
-                    ...w,
-                    items: w.items.map((t) =>
-                      t.id === todoId ? { ...t, done: !t.done } : t
-                    )
-                  }
-                : w
-            ),
-            updatedAt: Date.now()
-          }
-        : b
-    )
-  };
+  return updateWidgetInBoard(data, boardId, widgetId, (w) =>
+    w.type === 'todo'
+      ? { ...w, items: w.items.map((t) => (t.id === todoId ? { ...t, done: !t.done } : t)) }
+      : w
+  );
 }
 
 // Export / Import

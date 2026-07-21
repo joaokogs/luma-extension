@@ -40,15 +40,20 @@ export function SearchBar({
 
   const currentEngine = SEARCH_ENGINES.find((e) => e.id === searchEngine);
 
+  const abortRef = useRef<AbortController | null>(null);
+
   const fetchSuggestions = async (q: string) => {
     const trimmed = q.trim();
     if (!trimmed || !currentEngine) {
       setWebSuggestions([]);
       return;
     }
+    abortRef.current?.abort();
+    const abort = new AbortController();
+    abortRef.current = abort;
     try {
       const url = `${currentEngine.autocomplete}${encodeURIComponent(trimmed)}`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: abort.signal });
       if (!res.ok) { setWebSuggestions([]); return; }
       const data = await res.json();
       if (currentEngine.id === 'duckduckgo') {
@@ -56,7 +61,8 @@ export function SearchBar({
       } else {
         setWebSuggestions((data as [string, string[]])[1] || []);
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       setWebSuggestions([]);
     }
   };

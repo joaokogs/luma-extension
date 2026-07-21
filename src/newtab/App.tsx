@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Settings, Menu, Plus, Palette } from 'lucide-preact';
 import type { AppData, Widget, WidgetType, TopWidgetConfig, SearchEngine } from '@shared/types';
 import { SEARCH_ENGINES } from '@shared/types';
@@ -96,9 +96,34 @@ export function App() {
     };
   }, []);
 
+  const saveDebounceRef = useRef<number | null>(null);
+  const latestDataRef = useRef<AppData | null>(null);
+
   useEffect(() => {
-    if (data) saveData(data);
+    latestDataRef.current = data;
+    if (data) {
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+      saveDebounceRef.current = window.setTimeout(() => {
+        saveDebounceRef.current = null;
+        if (latestDataRef.current) saveData(latestDataRef.current);
+      }, 500);
+    }
+    return () => {
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+    };
   }, [data]);
+
+  useEffect(() => {
+    const flush = () => {
+      if (saveDebounceRef.current) {
+        clearTimeout(saveDebounceRef.current);
+        saveDebounceRef.current = null;
+      }
+      if (latestDataRef.current) saveData(latestDataRef.current);
+    };
+    window.addEventListener('beforeunload', flush);
+    return () => window.removeEventListener('beforeunload', flush);
+  }, []);
 
   useEffect(() => {
     if (data && activeBoardId && data.settings.lastBoardId !== activeBoardId) {
