@@ -142,8 +142,9 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
           <div className="theme-color-input-row">
             <span
               className="theme-color-swatch"
-              style={{ background: themeConfig.primaryColor }}
-            />
+            >
+              <span style={{ background: themeConfig.primaryColor }} />
+            </span>
             <input
               type="text"
               value={themeConfig.primaryColor}
@@ -170,8 +171,9 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
           <div className="theme-color-input-row">
             <span
               className="theme-color-swatch"
-              style={{ background: themeConfig.boardColor }}
-            />
+            >
+              <span style={{ background: themeConfig.boardColor }} />
+            </span>
             <input
               type="text"
               value={themeConfig.boardColor}
