@@ -3,7 +3,7 @@ import { HexColorPicker } from 'react-colorful';
 import type { AppSettings, WallpaperSetting } from '@shared/types';
 import { DEFAULT_WALLPAPERS } from '@shared/types';
 import { useThemeStore } from '../store/useThemeStore';
-import { X, Sun, Moon, Check, Upload, Trash2 } from 'lucide-preact';
+import { X, Sun, Moon, Upload, Trash2 } from 'lucide-preact';
 
 const MAX_UPLOADS = 5;
 
@@ -14,9 +14,6 @@ interface BackgroundPanelProps {
 }
 
 export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanelProps) {
-  const [customUrl, setCustomUrl] = useState(
-    settings.wallpaper.type === 'url' ? settings.wallpaper.value : ''
-  );
   const [applying, setApplying] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -35,17 +32,6 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [onClose]);
-
-  const applyCustomWallpaper = useCallback(async () => {
-    if (!customUrl.trim()) return;
-    const wp: WallpaperSetting = { type: 'url', value: customUrl.trim() };
-    onChange({ wallpaper: wp });
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const actualDark = settings.theme === 'dark' || (settings.theme === 'system' && prefersDark);
-    setApplying(true);
-    await applyFromWallpaper(wp, actualDark);
-    setApplying(false);
-  }, [customUrl, onChange, applyFromWallpaper, settings.theme]);
 
   const handleWallpaperSelect = useCallback(async (wp: WallpaperSetting) => {
     onChange({ wallpaper: wp });
@@ -195,7 +181,7 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
             <div key={`uploaded-${index}`} className="wallpaper-thumb-wrapper">
               <button
                 className={`wallpaper-thumb ${isSelected({ type: 'url', value: dataUrl }) ? 'wallpaper-thumb--active' : ''}`}
-                style={{ background: `url(${dataUrl}) center/cover no-repeat` }}
+                style={{ backgroundImage: `url(${dataUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
                 onClick={() => handleWallpaperSelect({ type: 'url', value: dataUrl })}
                 disabled={applying}
                 aria-label={`Selecionar imagem ${index + 1}`}
@@ -256,19 +242,6 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
           </div>
         )}
 
-        <div className="custom-wallpaper">
-          <input
-            type="url"
-            placeholder="URL da imagem customizada"
-            value={customUrl}
-            onChange={(e) => setCustomUrl((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && applyCustomWallpaper()}
-            aria-label="URL de imagem customizada"
-          />
-          <button onClick={applyCustomWallpaper} aria-label="Aplicar wallpaper customizado">
-            <Check size={16} strokeWidth={2} />
-          </button>
-        </div>
       </div>
 
       <div className="settings-panel__section">
