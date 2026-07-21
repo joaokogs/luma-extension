@@ -3,7 +3,9 @@ import { HexColorPicker } from 'react-colorful';
 import type { AppSettings, WallpaperSetting } from '@shared/types';
 import { DEFAULT_WALLPAPERS } from '@shared/types';
 import { useThemeStore } from '../store/useThemeStore';
-import { X, Sun, Moon, Check } from 'lucide-preact';
+import { X, Sun, Moon, Check, Upload, Trash2 } from 'lucide-preact';
+
+const MAX_UPLOADS = 5;
 
 interface BackgroundPanelProps {
   settings: AppSettings;
@@ -16,7 +18,9 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
     settings.wallpaper.type === 'url' ? settings.wallpaper.value : ''
   );
   const [applying, setApplying] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const themeConfig = useThemeStore((s) => s.themeConfig);
   const updateThemeConfig = useThemeStore((s) => s.updateThemeConfig);
@@ -60,8 +64,80 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
     setApplying(false);
   }, [settings.wallpaper, settings.theme, applyFromWallpaper]);
 
+  const handleFiles = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (fileArray.length === 0) return;
+
+    const current = settings.uploadedBackgrounds || [];
+    const available = MAX_UPLOADS - current.length;
+    if (available <= 0) return;
+
+    const toUpload = fileArray.slice(0, available);
+    const results: string[] = [];
+
+    for (const file of toUpload) {
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        results.push(dataUrl);
+      } catch {
+        // skip failed reads
+      }
+    }
+
+    if (results.length === 0) return;
+    onChange({ uploadedBackgrounds: [...current, ...results] });
+  }, [settings.uploadedBackgrounds, onChange]);
+
+  const handleFileInput = useCallback((e: Event) => {
+    const input = e.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      handleFiles(input.files);
+      input.value = '';
+    }
+  }, [handleFiles]);
+
+  const handleDeleteUploaded = useCallback((index: number) => {
+    const current = settings.uploadedBackgrounds || [];
+    const updated = current.filter((_, i) => i !== index);
+    onChange({ uploadedBackgrounds: updated });
+
+    const deleted = current[index];
+    if (deleted && settings.wallpaper.type === 'url' && settings.wallpaper.value === deleted) {
+      onChange({ wallpaper: DEFAULT_WALLPAPERS[0] });
+    }
+  }, [settings.uploadedBackgrounds, settings.wallpaper, onChange]);
+
+  const handleDrop = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer?.files) {
+      handleFiles(e.dataTransfer.files);
+    }
+  }, [handleFiles]);
+
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOver(false);
+  }, []);
+
+  const readFileAsDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const isSelected = (wp: WallpaperSetting) =>
     settings.wallpaper.type === wp.type && settings.wallpaper.value === wp.value;
+
+  const uploadedBackgrounds = settings.uploadedBackgrounds || [];
+  const canUpload = uploadedBackgrounds.length < MAX_UPLOADS;
 
   return (
     <div className="settings-panel" ref={panelRef} role="dialog" aria-label="Personalizar aparência">
@@ -115,7 +191,70 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
               title={`Wallpaper ${index + 1}`}
             />
           ))}
+          {uploadedBackgrounds.map((dataUrl, index) => (
+            <div key={`uploaded-${index}`} className="wallpaper-thumb-wrapper">
+              <button
+                className={`wallpaper-thumb ${isSelected({ type: 'url', value: dataUrl }) ? 'wallpaper-thumb--active' : ''}`}
+                style={{ background: `url(${dataUrl}) center/cover no-repeat` }}
+                onClick={() => handleWallpaperSelect({ type: 'url', value: dataUrl })}
+                disabled={applying}
+                aria-label={`Selecionar imagem ${index + 1}`}
+                title={`Imagem ${index + 1}`}
+              />
+              <button
+                className="wallpaper-thumb__delete"
+                onClick={(e) => { e.stopPropagation(); handleDeleteUploaded(index); }}
+                aria-label={`Excluir imagem ${index + 1}`}
+                title="Excluir"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+          {canUpload && (
+            <button
+              className="wallpaper-upload"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Fazer upload de imagem"
+              title="Upload de imagem"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              <Upload size={20} />
+              <span>Upload</span>
+            </button>
+          )}
         </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          style={{ display: 'none' }}
+          onChange={handleFileInput}
+        />
+
+        {canUpload && (
+          <div
+            className={`wallpaper-dropzone ${dragOver ? 'wallpaper-dropzone--drag-over' : ''}`}
+            onClick={() => fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            role="button"
+            tabIndex={0}
+            aria-label="Arraste imagens ou clique para fazer upload"
+            onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+          >
+            <Upload size={18} />
+            <span>Arraste imagens ou clique para fazer upload</span>
+            <span className="wallpaper-dropzone__hint">
+              {uploadedBackgrounds.length}/{MAX_UPLOADS} usadas
+            </span>
+          </div>
+        )}
 
         <div className="custom-wallpaper">
           <input

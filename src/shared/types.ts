@@ -106,6 +106,7 @@ export interface AppSettings {
   editMode?: boolean;
   openInNewTab?: boolean;
   recentSearches?: string[];
+  uploadedBackgrounds?: string[];
 }
 
 export interface WallpaperSetting {
