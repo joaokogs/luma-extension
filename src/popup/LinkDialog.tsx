@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { LinkItem } from '@shared/types';
 import { normalizeUrl } from '@shared/storage';
-import { Icon } from './Icon';
+import { X } from 'lucide-preact';
 
 interface LinkDialogProps {
   link?: LinkItem | null;
@@ -26,7 +26,7 @@ export function LinkDialog({ link, onSave, onClose }: LinkDialogProps) {
         <div className="dialog__header">
           <h2>{isEdit ? 'Editar link' : 'Adicionar link'}</h2>
           <button className="dialog__close" onClick={onClose} aria-label="Fechar">
-            <Icon name="close" size={18} />
+            <X size={18} />
           </button>
         </div>
 

@@ -3,7 +3,7 @@
  * Keep this file dependency-free so it can be imported anywhere.
  */
 
-export type WidgetType = 'links' | 'calendar' | 'pomodoro' | 'clock' | 'weather' | 'focus';
+export type WidgetType = 'links' | 'calendar' | 'pomodoro' | 'clock' | 'weather' | 'focus' | 'todo';
 
 export interface LinkItem {
   id: string;
@@ -47,12 +47,23 @@ export interface WeatherWidget extends BaseWidget {
   city?: string;
 }
 
+export interface TodoItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export interface TodoWidget extends BaseWidget {
+  type: 'todo';
+  items: TodoItem[];
+}
+
 export interface FocusWidget extends BaseWidget {
   type: 'focus';
   targetMinutes?: number;
 }
 
-export type Widget = LinksWidget | CalendarWidget | PomodoroWidget | ClockWidget | WeatherWidget | FocusWidget;
+export type Widget = LinksWidget | CalendarWidget | PomodoroWidget | ClockWidget | WeatherWidget | FocusWidget | TodoWidget;
 
 export interface Board {
   id: string;

@@ -3,7 +3,7 @@ import { HexColorPicker } from 'react-colorful';
 import type { AppSettings, WallpaperSetting } from '@shared/types';
 import { DEFAULT_WALLPAPERS } from '@shared/types';
 import { useThemeStore } from '../store/useThemeStore';
-import { Icon } from './Icon';
+import { X, Sun, Moon, Check } from 'lucide-preact';
 
 interface BackgroundPanelProps {
   settings: AppSettings;
@@ -68,7 +68,7 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
       <div className="settings-panel__header">
         <h3>Aparência</h3>
         <button className="settings-panel__close" onClick={onClose} aria-label="Fechar">
-          <Icon name="close" size={18} />
+          <X size={18} />
         </button>
       </div>
 
@@ -80,7 +80,7 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
             onClick={() => onChange({ theme: 'light' })}
             aria-label="Tema claro"
           >
-            <Icon name="sun" size={16} />
+            <Sun size={16} strokeWidth={2} />
             <span>Claro</span>
           </button>
           <button
@@ -88,7 +88,7 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
             onClick={() => onChange({ theme: 'dark' })}
             aria-label="Tema escuro"
           >
-            <Icon name="moon" size={16} />
+            <Moon size={16} strokeWidth={2} />
             <span>Escuro</span>
           </button>
           <button
@@ -127,7 +127,7 @@ export function BackgroundPanel({ settings, onChange, onClose }: BackgroundPanel
             aria-label="URL de imagem customizada"
           />
           <button onClick={applyCustomWallpaper} aria-label="Aplicar wallpaper customizado">
-            <Icon name="check" size={16} />
+            <Check size={16} strokeWidth={2} />
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { Icon } from './Icon';
+import { RotateCcw, SkipForward, Play, Pause } from 'lucide-preact';
 
 type Mode = 'focus' | 'short' | 'long';
 
@@ -80,13 +80,13 @@ export function PomodoroWidgetView() {
       </div>
       <div className="pomodoro-widget__controls">
         <button className="pomodoro-widget__btn" onClick={reset} aria-label="Reiniciar">
-          <Icon name="rotate-ccw" size={18} />
+          <RotateCcw size={18} strokeWidth={2} />
         </button>
         <button className="pomodoro-widget__btn pomodoro-widget__btn--primary" onClick={toggle} aria-label={isRunning ? 'Pausar' : 'Iniciar'}>
-          <Icon name={isRunning ? 'pause' : 'play'} size={22} />
+          {isRunning ? <Pause size={22} strokeWidth={2} /> : <Play size={22} strokeWidth={2} />}
         </button>
         <button className="pomodoro-widget__btn" onClick={() => changeMode(mode)} aria-label="Próximo">
-          <Icon name="skip-forward" size={18} />
+          <SkipForward size={18} strokeWidth={2} />
         </button>
       </div>
     </div>

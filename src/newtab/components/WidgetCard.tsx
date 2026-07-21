@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
 import type { Widget } from '@shared/types';
-import { Icon } from './Icon';
+import { MoreVertical, Plus, Pencil, Trash2 } from 'lucide-preact';
 
 interface WidgetCardProps {
   widget: Widget;
@@ -148,7 +148,7 @@ export function WidgetCard({
                 aria-label="Ações do widget"
                 title="Ações"
               >
-                <Icon name="more-vertical" size={16} />
+                <MoreVertical size={16} strokeWidth={2} />
               </button>
               {menuOpen && createPortal(
                 <div
@@ -161,7 +161,7 @@ export function WidgetCard({
                       className="widget-card__menu-item"
                       onClick={handleAction(onAddLink)}
                     >
-                      <Icon name="plus" size={14} />
+                      <Plus size={14} strokeWidth={2} />
                       Adicionar link
                     </button>
                   )}
@@ -170,7 +170,7 @@ export function WidgetCard({
                       className="widget-card__menu-item"
                       onClick={handleAction(onEdit)}
                     >
-                      <Icon name="edit" size={14} />
+                      <Pencil size={14} strokeWidth={2} />
                       Editar
                     </button>
                   )}
@@ -179,7 +179,7 @@ export function WidgetCard({
                       className="widget-card__menu-item widget-card__menu-item--danger"
                       onClick={handleAction(onDelete)}
                     >
-                      <Icon name="trash" size={14} />
+                      <Trash2 size={14} strokeWidth={2} />
                       Excluir
                     </button>
                   )}

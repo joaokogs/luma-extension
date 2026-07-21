@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { LinkItem } from '@shared/types';
 import { normalizeUrl } from '@shared/storage';
-import { Icon } from './Icon';
+import { X } from 'lucide-preact';
 import { IconPicker } from './IconPicker';
 
 interface LinkDialogProps {
@@ -37,7 +37,7 @@ export function LinkDialog({ widgetTitle, link, onSave, onClose }: LinkDialogPro
             {widgetTitle ? <span className="modal__subtitle"> em {widgetTitle}</span> : null}
           </h2>
           <button className="modal__close" onClick={onClose} aria-label="Fechar">
-            <Icon name="close" size={18} />
+            <X size={18} />
           </button>
         </div>
 
@@ -53,7 +53,7 @@ export function LinkDialog({ widgetTitle, link, onSave, onClose }: LinkDialogPro
                   onClick={() => setIcon(null)}
                   aria-label="Remover ícone"
                 >
-                  <Icon name="close" size={14} />
+                  <X size={14} />
                 </button>
               )}
             </div>

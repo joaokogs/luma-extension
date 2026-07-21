@@ -1,4 +1,4 @@
-import { Icon } from './Icon';
+import { Trash2 } from 'lucide-preact';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -35,7 +35,7 @@ export function ConfirmDialog({
         <div className="confirm-dialog__body">
           {danger && (
             <div className="confirm-dialog__icon">
-              <Icon name="trash" size={24} />
+              <Trash2 size={24} strokeWidth={2} />
             </div>
           )}
           <h3 className="confirm-dialog__title">{title}</h3>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { Icon } from './Icon';
+import { Sun, Cloud, CloudSun, CloudRain } from 'lucide-preact';
 
 interface WeatherWidgetViewProps {
   city?: string;
@@ -124,7 +124,10 @@ export function WeatherWidgetView({ city = '' }: WeatherWidgetViewProps) {
         {weather.isGeo ? '📍 ' : ''}{weather.cityName.toUpperCase()}
       </div>
       <div className="weather-widget__row">
-        <Icon name={iconName} size={22} />
+        {iconName === 'sun' ? <Sun size={22} strokeWidth={2} />
+          : iconName === 'cloud' ? <Cloud size={22} strokeWidth={2} />
+          : iconName === 'cloud-rain' ? <CloudRain size={22} strokeWidth={2} />
+          : <CloudSun size={22} strokeWidth={2} />}
         <span className="weather-widget__temp">{weather.temp}°C</span>
       </div>
     </div>

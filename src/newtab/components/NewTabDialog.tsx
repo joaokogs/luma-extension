@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
-import { Icon } from './Icon';
+import { X } from 'lucide-preact';
 
 interface NewTabDialogProps {
   open: boolean;
@@ -39,7 +39,7 @@ export function NewTabDialog({ open, onSave, onClose }: NewTabDialogProps) {
         <div className="modal__header">
           <h2>Nova aba</h2>
           <button className="modal__close" onClick={onClose} aria-label="Fechar">
-            <Icon name="close" size={18} />
+            <X size={18} />
           </button>
         </div>
 

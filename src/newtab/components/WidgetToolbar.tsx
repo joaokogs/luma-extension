@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { CalendarDays, Clock3, Cloud, Crosshair, Search, Timer, type LucideIcon } from 'lucide-preact';
+import { CalendarDays, Clock3, Cloud, Crosshair, Search, Timer, CheckSquare, type LucideIcon } from 'lucide-preact';
 import type { WidgetType, TopWidgetConfig } from '@shared/types';
 import { CityAutocomplete } from './CityAutocomplete';
 
@@ -19,6 +19,7 @@ const BLOCK_WIDGETS: WidgetOption[] = [
   { type: 'clock', label: 'Clock', icon: Clock3, hasAdd: true },
   { type: 'weather', label: 'Weather', icon: Cloud, hasAdd: true },
   { type: 'focus', label: 'Focus', icon: Crosshair, hasAdd: true },
+  { type: 'todo', label: 'Bloco de Notas', icon: CheckSquare, hasAdd: true },
 ];
 
 const HEADER_WIDGETS: WidgetOption[] = [

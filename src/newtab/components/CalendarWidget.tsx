@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
+import { ChevronLeft, ChevronRight } from 'lucide-preact';
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -39,15 +40,11 @@ export function CalendarWidgetView() {
     <div className="calendar-widget">
       <div className="calendar-widget__header">
         <button className="calendar-widget__nav" onClick={prevMonth} aria-label="Mês anterior">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ChevronLeft size={16} strokeWidth={2} />
         </button>
         <span className="calendar-widget__month">{MONTHS[monthIndex]} {year}</span>
         <button className="calendar-widget__nav" onClick={nextMonth} aria-label="Próximo mês">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <ChevronRight size={16} strokeWidth={2} />
         </button>
       </div>
       <div className="calendar-widget__grid">

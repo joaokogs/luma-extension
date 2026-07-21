@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import type { LinksWidget } from '@shared/types';
-import { Icon } from './Icon';
+import { X, Trash2 } from 'lucide-preact';
 
 interface WidgetDialogProps {
   widget: LinksWidget;
@@ -22,7 +22,7 @@ export function WidgetDialog({ widget, onSave, onDelete, onClose }: WidgetDialog
         <div className="dialog__header">
           <h2>Editar bloco</h2>
           <button className="dialog__close" onClick={onClose} aria-label="Fechar">
-            <Icon name="close" size={18} />
+            <X size={18} />
           </button>
         </div>
 
@@ -41,7 +41,7 @@ export function WidgetDialog({ widget, onSave, onDelete, onClose }: WidgetDialog
 
         <div className="dialog__actions">
           <button type="button" className="btn btn--danger" onClick={onDelete}>
-            <Icon name="trash" size={14} />
+            <Trash2 size={14} strokeWidth={2} />
             Excluir bloco
           </button>
           <div style={{ flex: 1 }} />

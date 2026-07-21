@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { Icon } from './Icon';
+import { Search, X, Bookmark, Clock, Globe } from 'lucide-preact';
 import { SEARCH_ENGINES } from '@shared/types';
 import type { LinkItem, SearchEngine } from '@shared/types';
 
@@ -153,7 +153,7 @@ export function SearchBar({
   return (
     <div ref={containerRef} className="app-header__search">
       <div className="search-tools">
-        <Icon name="search" size={22} className="app-header__search-icon" />
+        <Search size={22} strokeWidth={2} className="app-header__search-icon" />
         <button
           className="search-engine-btn"
           onClick={() => setEngineDropdownOpen((s) => !s)}
@@ -186,7 +186,7 @@ export function SearchBar({
           onClick={() => { onSearchQueryChange(''); setOpen(false); inputRef.current?.focus(); }}
           aria-label="Limpar busca"
         >
-          <Icon name="close" size={14} />
+          <X size={14} />
         </button>
       )}
 
@@ -222,11 +222,9 @@ export function SearchBar({
                 role="option"
                 aria-selected={index === highlighted}
               >
-                <Icon
-                  name={item.type === 'link' ? 'bookmark' : item.type === 'recent' ? 'clock' : 'globe'}
-                  size={14}
-                  className="search-suggestions__icon"
-                />
+                {item.type === 'link' ? <Bookmark size={14} strokeWidth={2} className="search-suggestions__icon" />
+                  : item.type === 'recent' ? <Clock size={14} strokeWidth={2} className="search-suggestions__icon" />
+                  : <Globe size={14} strokeWidth={2} className="search-suggestions__icon" />}
                 <span className="search-suggestions__text">{item.text}</span>
                 {item.type === 'recent' && onRemoveRecentSearch && (
                   <button
@@ -234,7 +232,7 @@ export function SearchBar({
                     onClick={(e) => { e.stopPropagation(); onRemoveRecentSearch(item.text); }}
                     aria-label={`Remover busca "${item.text}"`}
                   >
-                    <Icon name="close" size={12} />
+                    <X size={12} />
                   </button>
                 )}
               </li>

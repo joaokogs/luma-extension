@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'preact/hooks';
 import type { AppSettings } from '@shared/types';
-import { Icon } from './Icon';
+import { X, Trash2, Download, Upload } from 'lucide-preact';
 
 interface SettingsPanelProps {
   settings: AppSettings;
@@ -30,7 +30,7 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport,
       <div className="settings-panel__header">
         <h3>Configurações</h3>
         <button className="settings-panel__close" onClick={onClose} aria-label="Fechar configurações">
-          <Icon name="close" size={18} />
+          <X size={18} />
         </button>
       </div>
 
@@ -68,7 +68,7 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport,
         <label className="settings-panel__label">Histórico de Buscas</label>
         <div className="backup-actions">
           <button className="btn btn--danger" onClick={() => onClearRecentSearches?.()} disabled={!(settings.recentSearches && settings.recentSearches.length > 0)}>
-            <Icon name="trash" size={14} /> Limpar histórico
+            <Trash2 size={14} strokeWidth={2} /> Limpar histórico
           </button>
         </div>
       </div>
@@ -77,10 +77,10 @@ export function SettingsPanel({ settings, onChange, onClose, onExport, onImport,
         <label className="settings-panel__label">Backup</label>
         <div className="backup-actions">
           <button className="btn btn--secondary" onClick={onExport}>
-            <Icon name="download" size={14} /> Exportar JSON
+            <Download size={14} strokeWidth={2} /> Exportar JSON
           </button>
           <button className="btn btn--secondary" onClick={() => fileInputRef.current?.click()}>
-            <Icon name="upload" size={14} /> Importar JSON
+            <Upload size={14} strokeWidth={2} /> Importar JSON
           </button>
           <input
             ref={fileInputRef}

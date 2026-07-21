@@ -10,6 +10,7 @@ import type {
   AppSettings,
   Board,
   LinkItem,
+  TodoItem,
   TopWidgetConfig,
   Widget,
   WidgetType
@@ -180,6 +181,8 @@ export function createWidget(type: WidgetType, title: string): Widget {
       return { ...base, type: 'weather', city: 'New York' };
     case 'focus':
       return { ...base, type: 'focus', targetMinutes: 240 };
+    case 'todo':
+      return { ...base, type: 'todo', items: [] };
   }
 }
 
@@ -197,6 +200,8 @@ function defaultWidgetTitle(type: WidgetType): string {
       return 'Weather';
     case 'focus':
       return 'Focus Today';
+    case 'todo':
+      return 'Bloco de Notas';
   }
 }
 
@@ -410,6 +415,100 @@ export function moveLink(
 
       return { ...b, widgets, updatedAt: Date.now() };
     })
+  };
+}
+
+// Todo items inside a widget
+export function createTodoItem(text: string): TodoItem {
+  return {
+    id: generateId('todo'),
+    text: text.trim() || 'Nova nota',
+    done: false
+  };
+}
+
+export function addTodoItem(data: AppData, boardId: string, widgetId: string, todo: TodoItem): AppData {
+  return {
+    ...data,
+    boards: data.boards.map((b) =>
+      b.id === boardId
+        ? {
+            ...b,
+            widgets: b.widgets.map((w) =>
+              w.id === widgetId && w.type === 'todo' ? { ...w, items: [...w.items, todo] } : w
+            ),
+            updatedAt: Date.now()
+          }
+        : b
+    )
+  };
+}
+
+export function deleteTodoItem(data: AppData, boardId: string, widgetId: string, todoId: string): AppData {
+  return {
+    ...data,
+    boards: data.boards.map((b) =>
+      b.id === boardId
+        ? {
+            ...b,
+            widgets: b.widgets.map((w) =>
+              w.id === widgetId && w.type === 'todo'
+                ? { ...w, items: w.items.filter((t) => t.id !== todoId) }
+                : w
+            ),
+            updatedAt: Date.now()
+          }
+        : b
+    )
+  };
+}
+
+export function updateTodoItem(
+  data: AppData,
+  boardId: string,
+  widgetId: string,
+  todoId: string,
+  updates: Partial<TodoItem>
+): AppData {
+  return {
+    ...data,
+    boards: data.boards.map((b) =>
+      b.id === boardId
+        ? {
+            ...b,
+            widgets: b.widgets.map((w) =>
+              w.id === widgetId && w.type === 'todo'
+                ? { ...w, items: w.items.map((t) => (t.id === todoId ? { ...t, ...updates } : t)) }
+                : w
+            ),
+            updatedAt: Date.now()
+          }
+        : b
+    )
+  };
+}
+
+export function toggleTodoItem(data: AppData, boardId: string, widgetId: string, todoId: string): AppData {
+  return {
+    ...data,
+    boards: data.boards.map((b) =>
+      b.id === boardId
+        ? {
+            ...b,
+            widgets: b.widgets.map((w) =>
+              w.id === widgetId && w.type === 'todo'
+                ? {
+                    ...w,
+                    items: w.items.map((t) =>
+                      t.id === todoId ? { ...t, done: !t.done } : t
+                    )
+                  }
+                : w
+            ),
+            updatedAt: Date.now()
+          }
+        : b
+    )
   };
 }
 

@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { Widget, WidgetType } from '@shared/types';
 import { createWidget } from '@shared/storage';
-import { Icon, type IconName } from './Icon';
+import { X, ExternalLink, LayoutGrid, Clock, CloudSun, Target, CheckSquare } from 'lucide-preact';
+import type { LucideIcon } from 'lucide-preact';
 import { CityAutocomplete } from './CityAutocomplete';
 
-const WIDGET_TYPES: { type: WidgetType; label: string; icon: IconName }[] = [
-  { type: 'links', label: 'Links', icon: 'external' },
-  { type: 'calendar', label: 'Calendário', icon: 'grid' },
-  { type: 'pomodoro', label: 'Pomodoro', icon: 'clock' },
-  { type: 'clock', label: 'Relógio', icon: 'clock' },
-  { type: 'weather', label: 'Clima', icon: 'cloud-sun' },
-  { type: 'focus', label: 'Foco Hoje', icon: 'target' }
+const WIDGET_TYPES: { type: WidgetType; label: string; icon: LucideIcon }[] = [
+  { type: 'links', label: 'Links', icon: ExternalLink },
+  { type: 'calendar', label: 'Calendário', icon: LayoutGrid },
+  { type: 'pomodoro', label: 'Pomodoro', icon: Clock },
+  { type: 'clock', label: 'Relógio', icon: Clock },
+  { type: 'weather', label: 'Clima', icon: CloudSun },
+  { type: 'focus', label: 'Foco Hoje', icon: Target },
+  { type: 'todo', label: 'Bloco de Notas', icon: CheckSquare }
 ];
 
 interface WidgetEditorProps {
@@ -87,7 +89,7 @@ export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onS
         <div className="modal__header">
           <h2>{isEdit ? 'Editar widget' : linksOnly ? 'Novo bloco de links' : 'Novo widget'}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Fechar">
-            <Icon name="close" size={18} />
+            <X size={18} />
           </button>
         </div>
 
@@ -103,7 +105,7 @@ export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onS
                     className={`widget-editor__type ${type === t.type ? 'widget-editor__type--active' : ''}`}
                     onClick={() => setType(t.type)}
                   >
-                    <Icon name={t.icon} size={18} />
+                    <t.icon size={18} strokeWidth={2} />
                     <span>{t.label}</span>
                   </button>
                 ))}
@@ -112,7 +114,7 @@ export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onS
           )}
 
           <div className="widget-editor__row">
-            {(linksOnly || (isEdit && type === 'links')) && (
+            {(linksOnly || (isEdit && (type === 'links' || type === 'todo'))) && (
               <label className="widget-editor__field">
                 <span>Título</span>
                 <input

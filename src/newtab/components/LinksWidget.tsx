@@ -3,7 +3,7 @@ import { createPortal } from 'preact/compat';
 import type { LinkItem, LinksWidget } from '@shared/types';
 import { getFaviconUrl } from '@shared/storage';
 import { AnyIcon } from './AnyIcon';
-import { Icon } from './Icon';
+import { GripVertical, MoreVertical, Pencil, Trash2 } from 'lucide-preact';
 
 interface LinkDragState {
   linkId: string | null;
@@ -240,7 +240,7 @@ function LinkRow({
         aria-label={`Abrir ${link.title}`}
       >
         <span className="links-widget__drag-handle" aria-hidden="true">
-          <Icon name="grip-vertical" size={12} />
+          <GripVertical size={12} />
         </span>
         <span className="links-widget__icon">
           {link.icon ? (
@@ -256,7 +256,7 @@ function LinkRow({
               onError={() => setImageError(true)}
             />
           ) : (
-            <AnyIcon name="fa:link" size={14} />
+            <AnyIcon name="link" size={14} />
           )}
         </span>
         <span className="links-widget__text">{link.title}</span>
@@ -270,7 +270,7 @@ function LinkRow({
             aria-label="Ações do link"
             title="Ações"
           >
-            <Icon name="more-vertical" size={14} />
+            <MoreVertical size={14} strokeWidth={2} />
           </button>
           {menuOpen && createPortal(
             <div
@@ -283,7 +283,7 @@ function LinkRow({
                   className="links-widget__menu-item"
                   onClick={handleAction(onEdit)}
                 >
-                  <Icon name="edit" size={14} />
+                  <Pencil size={14} strokeWidth={2} />
                   Editar
                 </button>
               )}
@@ -292,7 +292,7 @@ function LinkRow({
                   className="links-widget__menu-item links-widget__menu-item--danger"
                   onClick={handleAction(onDelete)}
                 >
-                  <Icon name="trash" size={14} />
+                  <Trash2 size={14} strokeWidth={2} />
                   Excluir
                 </button>
               )}

@@ -7,6 +7,7 @@ import { PomodoroWidgetView } from './PomodoroWidget';
 import { ClockWidgetView } from './ClockWidget';
 import { WeatherWidgetView } from './WeatherWidget';
 import { FocusWidgetView } from './FocusWidget';
+import { TodoWidgetView } from './TodoWidget';
 import { useColumnCount } from '../hooks/useColumnCount';
 
 interface WidgetGridProps {
@@ -21,6 +22,10 @@ interface WidgetGridProps {
   onResizeWidget?: (widgetId: string, height: number) => void;
   onAddWidget?: (column: number) => void;
   onMoveLink?: (fromWidgetId: string, toWidgetId: string, linkId: string, toIndex: number) => void;
+  onAddTodo?: (widgetId: string, text: string) => void;
+  onToggleTodo?: (widgetId: string, todoId: string) => void;
+  onUpdateTodo?: (widgetId: string, todoId: string, text: string) => void;
+  onDeleteTodo?: (widgetId: string, todoId: string) => void;
   isEditing?: boolean;
 }
 
@@ -48,6 +53,10 @@ export function WidgetGrid({
   onResizeWidget,
   onAddWidget,
   onMoveLink,
+  onAddTodo,
+  onToggleTodo,
+  onUpdateTodo,
+  onDeleteTodo,
   isEditing = true
 }: WidgetGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -261,6 +270,10 @@ export function WidgetGrid({
                     onLinkDragStart={isEditing ? (e, linkId) => handleLinkDragStart(e, linkId, widget.id) : undefined}
                     onLinkDragEnd={isEditing ? handleLinkDragEnd : undefined}
                     onLinkDrop={isEditing ? (targetLinkId, position) => handleLinkDrop(widget.id, targetLinkId, position) : undefined}
+                    onAddTodo={onAddTodo}
+                    onToggleTodo={onToggleTodo}
+                    onUpdateTodo={onUpdateTodo}
+                    onDeleteTodo={onDeleteTodo}
                   />
                 </WidgetCard>
                 {isTarget && drag.position === 'after' && <DropIndicator />}
@@ -295,7 +308,11 @@ function WidgetContent({
   onEditLink,
   onLinkDragStart,
   onLinkDragEnd,
-  onLinkDrop
+  onLinkDrop,
+  onAddTodo,
+  onToggleTodo,
+  onUpdateTodo,
+  onDeleteTodo
 }: {
   widget: Widget;
   linkDrag: LinkDragState;
@@ -305,6 +322,10 @@ function WidgetContent({
   onLinkDragStart?: (e: DragEvent, linkId: string) => void;
   onLinkDragEnd?: () => void;
   onLinkDrop?: (targetLinkId: string | null, position: 'before' | 'after') => void;
+  onAddTodo?: (widgetId: string, text: string) => void;
+  onToggleTodo?: (widgetId: string, todoId: string) => void;
+  onUpdateTodo?: (widgetId: string, todoId: string, text: string) => void;
+  onDeleteTodo?: (widgetId: string, todoId: string) => void;
 }) {
   switch (widget.type) {
     case 'links':
@@ -330,6 +351,16 @@ function WidgetContent({
       return <WeatherWidgetView city={widget.city} />;
     case 'focus':
       return <FocusWidgetView targetMinutes={widget.targetMinutes} />;
+    case 'todo':
+      return (
+        <TodoWidgetView
+          widget={widget}
+          onAddTodo={onAddTodo ? (text) => onAddTodo(widget.id, text) : undefined}
+          onToggleTodo={onToggleTodo ? (todoId) => onToggleTodo(widget.id, todoId) : undefined}
+          onUpdateTodo={onUpdateTodo ? (todoId, text) => onUpdateTodo(widget.id, todoId, text) : undefined}
+          onDeleteTodo={onDeleteTodo ? (todoId) => onDeleteTodo(widget.id, todoId) : undefined}
+        />
+      );
     default:
       return null;
   }

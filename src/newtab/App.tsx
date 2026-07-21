@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { Settings } from 'lucide-preact';
+import { Settings, Menu, Plus, Palette } from 'lucide-preact';
 import type { AppData, Widget, WidgetType, TopWidgetConfig, SearchEngine } from '@shared/types';
 import { SEARCH_ENGINES } from '@shared/types';
 import {
@@ -18,6 +18,11 @@ import {
   deleteLink,
   updateLink,
   moveLink,
+  addTodoItem,
+  createTodoItem,
+  deleteTodoItem,
+  updateTodoItem,
+  toggleTodoItem,
   updateSettings,
   getBoardById,
   getInitialBoardId,
@@ -39,7 +44,7 @@ import { TopInfoWidgets } from './components/TopInfoWidgets';
 import { WidgetToolbar } from './components/WidgetToolbar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { NewTabDialog } from './components/NewTabDialog';
-import { Icon } from './components/Icon';
+
 import { SearchBar } from './components/SearchBar';
 import { useThemeStore } from './store/useThemeStore';
 import { computeThemeVariables } from '@shared/colorExtractor';
@@ -304,6 +309,31 @@ export function App() {
     setEditingLink(null);
   };
 
+  const handleAddTodo = (widgetId: string, text: string) => {
+    if (!activeBoardId) return;
+    const todo = createTodoItem(text);
+    setData((prev) => (prev && activeBoardId ? addTodoItem(prev, activeBoardId, widgetId, todo) : prev));
+  };
+
+  const handleToggleTodo = (widgetId: string, todoId: string) => {
+    if (!activeBoardId) return;
+    setData((prev) => (prev && activeBoardId ? toggleTodoItem(prev, activeBoardId, widgetId, todoId) : prev));
+  };
+
+  const handleUpdateTodo = (widgetId: string, todoId: string, text: string) => {
+    if (!activeBoardId) return;
+    setData((prev) =>
+      prev && activeBoardId
+        ? updateTodoItem(prev, activeBoardId, widgetId, todoId, { text: text.trim() })
+        : prev
+    );
+  };
+
+  const handleDeleteTodo = (widgetId: string, todoId: string) => {
+    if (!activeBoardId) return;
+    setData((prev) => (prev && activeBoardId ? deleteTodoItem(prev, activeBoardId, widgetId, todoId) : prev));
+  };
+
   const editingLinkData = useMemo(() => {
     if (!editingLink || !data || !activeBoardId) return null;
     const widget = data.boards
@@ -457,7 +487,7 @@ export function App() {
           aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
           title={menuOpen ? 'Fechar menu' : 'Menu'}
         >
-          <Icon name="menu" size={22} />
+          <Menu size={22} strokeWidth={2} />
         </button>
 
         <div className={`app-fab-menu ${menuOpen ? 'app-fab-menu--open' : ''}`}>
@@ -467,7 +497,7 @@ export function App() {
               aria-label="Adicionar widgets"
               title="Adicionar widgets"
             >
-              <Icon name="plus" size={18} />
+              <Plus size={18} strokeWidth={2} />
               <span>Widgets</span>
             </button>
           <button
@@ -476,7 +506,7 @@ export function App() {
             aria-label="Personalizar aparência"
             title="Personalizar aparência"
           >
-            <Icon name="palette" size={18} />
+            <Palette size={18} strokeWidth={2} />
             <span>Aparência</span>
           </button>
           <button
@@ -505,6 +535,10 @@ export function App() {
             onResizeWidget={handleResizeWidget}
             onAddWidget={handleStartAddWidget}
             onMoveLink={handleMoveLink}
+            onAddTodo={handleAddTodo}
+            onToggleTodo={handleToggleTodo}
+            onUpdateTodo={handleUpdateTodo}
+            onDeleteTodo={handleDeleteTodo}
             isEditing={editModeEnabled && !searchQuery.trim()}
           />
         )}

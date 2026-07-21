@@ -16,7 +16,7 @@ import {
   getFaviconUrl
 } from '@shared/storage';
 import { queryActiveTab } from '@shared/browser';
-import { Icon } from './Icon';
+import { Menu, Settings, Plus, ExternalLink, Pencil, Trash2 } from 'lucide-preact';
 import { LinkDialog } from './LinkDialog';
 import { WidgetDialog } from './WidgetDialog';
 
@@ -168,7 +168,7 @@ export function Popup() {
           aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
           title={menuOpen ? 'Fechar menu' : 'Abrir menu'}
         >
-          <Icon name="menu" size={22} />
+          <Menu size={22} strokeWidth={2} />
         </button>
       </div>
 
@@ -220,7 +220,7 @@ export function Popup() {
                   aria-label="Editar bloco"
                   title="Editar bloco"
                 >
-                  <Icon name="settings" size={14} />
+                  <Settings size={14} strokeWidth={2} />
                 </button>
               )}
             </div>
@@ -235,7 +235,7 @@ export function Popup() {
               aria-label="Adicionar link"
               title="Adicionar link"
             >
-              <Icon name="plus" size={18} />
+              <Plus size={18} strokeWidth={2} />
               Adicionar link
             </button>
           </div>
@@ -334,7 +334,7 @@ function LinkRow({
             onError={() => setImageError(true)}
           />
         ) : (
-          <Icon name="external" size={14} />
+          <ExternalLink size={14} strokeWidth={2} />
         )}
       </span>
       <a
@@ -356,7 +356,7 @@ function LinkRow({
               aria-label={`Editar ${link.title}`}
               title="Editar"
             >
-              <Icon name="edit" size={15} />
+              <Pencil size={15} strokeWidth={2} />
             </button>
           )}
           {onDelete && (
@@ -366,7 +366,7 @@ function LinkRow({
               aria-label={`Excluir ${link.title}`}
               title="Excluir"
             >
-              <Icon name="trash" size={15} />
+              <Trash2 size={15} strokeWidth={2} />
             </button>
           )}
         </div>

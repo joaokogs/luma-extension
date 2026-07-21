@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useState } from 'preact/hooks';
 import { HexColorPicker } from 'react-colorful';
 import { useThemeStore } from '../store/useThemeStore';
 import type { WallpaperSetting } from '@shared/types';
-import { Icon } from './Icon';
+import { X } from 'lucide-preact';
 
 interface ThemePanelProps {
   wallpaper: WallpaperSetting;
@@ -39,7 +39,7 @@ export function ThemePanel({ wallpaper, isDark, onClose }: ThemePanelProps) {
       <div className="settings-panel__header">
         <h3>Tema</h3>
         <button className="settings-panel__close" onClick={onClose} aria-label="Fechar tema">
-          <Icon name="close" size={18} />
+          <X size={18} />
         </button>
       </div>
 

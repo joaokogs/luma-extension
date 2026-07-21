@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
 import type { Board } from '@shared/types';
-import { Icon } from './Icon';
+import { ChevronLeft, ChevronRight, GripVertical, MoreVertical, Pencil, Trash2, Plus } from 'lucide-preact';
 
 interface BoardTabsProps {
   boards: Board[];
@@ -206,7 +206,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
           onClick={() => scrollBy('left')}
           aria-label="Rolar para esquerda"
         >
-          <Icon name="chevron-left" size={16} />
+          <ChevronLeft size={16} strokeWidth={2} />
         </button>
       )}
       <div className="board-tabs__scroll" ref={scrollRef}>
@@ -250,7 +250,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
               ) : (
                 <>
                   {board.id === activeId && (
-                    <Icon name="grip-vertical" size={12} className="board-tab__drag-handle" />
+                    <GripVertical size={12} strokeWidth={2} className="board-tab__drag-handle" />
                   )}
                   <span className="board-tab__title">{board.title}</span>
                   {board.id === activeId && (
@@ -262,7 +262,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
                         aria-label="Ações da aba"
                         title="Ações"
                       >
-                        <Icon name="more-vertical" size={12} />
+                        <MoreVertical size={12} strokeWidth={2} />
                       </button>
                     </div>
                   )}
@@ -276,7 +276,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
                         className="board-tab__menu-item"
                         onClick={handleAction(() => startRename(board))}
                       >
-                        <Icon name="edit" size={12} />
+                        <Pencil size={12} strokeWidth={2} />
                         Renomear
                       </button>
                       {boards.length > 1 && (
@@ -284,7 +284,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
                           className="board-tab__menu-item board-tab__menu-item--danger"
                           onClick={handleAction(() => onDelete(board.id, board.title))}
                         >
-                          <Icon name="trash" size={12} />
+                          <Trash2 size={12} strokeWidth={2} />
                           Excluir
                         </button>
                       )}
@@ -298,7 +298,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
         })}
 
         <button className="board-tab board-tab--add" onClick={onAdd} aria-label="Criar nova aba" title="Nova aba">
-          <Icon name="plus" size={14} />
+          <Plus size={14} strokeWidth={2} />
         </button>
       </div>
       {canScrollRight && (
@@ -307,7 +307,7 @@ export function BoardTabs({ boards, activeId, onSelect, onAdd, onRename, onDelet
           onClick={() => scrollBy('right')}
           aria-label="Rolar para direita"
         >
-          <Icon name="chevron-right" size={16} />
+          <ChevronRight size={16} strokeWidth={2} />
         </button>
       )}
     </nav>

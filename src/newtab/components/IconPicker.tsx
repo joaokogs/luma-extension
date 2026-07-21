@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
-import { AnyIcon, ICON_PICKER_LIST } from './AnyIcon';
+import { ICON_PICKER_LIST, getLucideIcon } from './AnyIcon';
+
 
 interface IconPickerProps {
   selected?: string | null;
@@ -14,6 +15,8 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
     ? ICON_PICKER_LIST.filter((i) => i.label.toLowerCase().includes(query.toLowerCase()))
     : ICON_PICKER_LIST;
 
+  const SelectedIcon = selected ? getLucideIcon(selected) : null;
+
   return (
     <div className="icon-picker">
       <button
@@ -23,7 +26,7 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
         aria-label="Selecionar ícone"
         title="Ícone do link"
       >
-        {selected ? <AnyIcon name={selected} size={18} /> : <span className="icon-picker__placeholder">+</span>}
+        {SelectedIcon ? <SelectedIcon size={18} strokeWidth={2} /> : <span className="icon-picker__placeholder">+</span>}
       </button>
       {open && (
         <div className="icon-picker__dropdown">
@@ -36,21 +39,24 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
             autoFocus
           />
           <div className="icon-picker__grid">
-            {filtered.map((icon) => (
-              <button
-                key={icon.name}
-                className={`icon-picker__option ${selected === icon.name ? 'icon-picker__option--active' : ''}`}
-                onClick={() => {
-                  onSelect(icon.name);
-                  setOpen(false);
-                  setQuery('');
-                }}
-                aria-label={icon.label}
-                title={icon.label}
-              >
-                <AnyIcon name={icon.name} size={18} />
-              </button>
-            ))}
+            {filtered.map((item) => {
+              const ItemIcon = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  className={`icon-picker__option ${selected === item.name ? 'icon-picker__option--active' : ''}`}
+                  onClick={() => {
+                    onSelect(item.name);
+                    setOpen(false);
+                    setQuery('');
+                  }}
+                  aria-label={item.label}
+                  title={item.label}
+                >
+                  <ItemIcon size={18} strokeWidth={2} />
+                </button>
+              );
+            })}
             <button
               className="icon-picker__option icon-picker__option--clear"
               onClick={() => {
