@@ -1,7 +1,6 @@
 import type { TopWidgetConfig } from '@shared/types';
 import { ClockWidgetView } from './ClockWidget';
 import { WeatherWidgetView } from './WeatherWidget';
-import { FocusWidgetView } from './FocusWidget';
 
 interface TopInfoWidgetsProps {
   configs: TopWidgetConfig[];
@@ -23,8 +22,6 @@ function TopWidget({ config }: { config: TopWidgetConfig }) {
   switch (config.type) {
     case 'weather':
       return <WeatherWidgetView city={config.city} />;
-    case 'focus':
-      return <FocusWidgetView targetMinutes={config.targetMinutes} />;
     case 'clock':
       return <ClockWidgetView timezone={config.timezone} label={config.label} />;
     default:

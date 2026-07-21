@@ -361,7 +361,6 @@ export function App() {
       // Add widget with defaults
       const newWidget: TopWidgetConfig = { type: type as any };
       if (type === 'weather') newWidget.city = 'New York';
-      if (type === 'focus') newWidget.targetMinutes = 240;
       handleSettingsChange({ topWidgets: [...currentTopWidgets, newWidget] });
     }
   };
@@ -600,7 +599,6 @@ export function App() {
       {showWidgetToolbar && (
         <WidgetToolbar
           topWidgets={data.settings.topWidgets || []}
-          boardWidgets={widgets.map((w) => w.type)}
           onToggleWidget={handleToggleWidget}
           onAddWidget={handleAddWidgetFromToolbar}
           onCityChange={handleToolbarCityChange}

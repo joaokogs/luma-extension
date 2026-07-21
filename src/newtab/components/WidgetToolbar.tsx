@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { CalendarDays, Clock3, Cloud, Crosshair, Search, Timer, CheckSquare, type LucideIcon } from 'lucide-preact';
+import { CalendarDays, Clock3, Cloud, Search, CheckSquare, type LucideIcon } from 'lucide-preact';
 import type { WidgetType, TopWidgetConfig } from '@shared/types';
 import { CityAutocomplete } from './CityAutocomplete';
 
@@ -10,28 +10,23 @@ interface WidgetOption {
   hasToggle?: boolean;
   hasAdd?: boolean;
   hasCity?: boolean;
-  requiresWidget?: WidgetType;
 }
 
 const BLOCK_WIDGETS: WidgetOption[] = [
   { type: 'calendar', label: 'Calendar', icon: CalendarDays, hasAdd: true },
-  { type: 'pomodoro', label: 'Pomodoro', icon: Timer, hasAdd: true },
   { type: 'clock', label: 'Clock', icon: Clock3, hasAdd: true },
   { type: 'weather', label: 'Weather', icon: Cloud, hasAdd: true },
-  { type: 'focus', label: 'Focus', icon: Crosshair, hasAdd: true },
   { type: 'todo', label: 'Bloco de Notas', icon: CheckSquare, hasAdd: true },
 ];
 
 const HEADER_WIDGETS: WidgetOption[] = [
   { type: 'clock', label: 'Clock', icon: Clock3, hasToggle: true },
   { type: 'search', label: 'Search', icon: Search, hasToggle: true },
-  { type: 'focus', label: 'Focus', icon: Crosshair, hasToggle: true, requiresWidget: 'pomodoro' },
   { type: 'weather', label: 'Weather', icon: Cloud, hasToggle: true, hasCity: true }
 ];
 
 interface WidgetToolbarProps {
   topWidgets: TopWidgetConfig[];
-  boardWidgets: WidgetType[];
   onToggleWidget: (type: WidgetType) => void;
   onAddWidget: (type: WidgetType) => void;
   onCityChange: (city: string) => void;
@@ -40,7 +35,6 @@ interface WidgetToolbarProps {
 
 export function WidgetToolbar({
   topWidgets,
-  boardWidgets,
   onToggleWidget,
   onAddWidget,
   onCityChange,
@@ -70,11 +64,7 @@ export function WidgetToolbar({
     return topWidgets.some((w) => w.type === type);
   };
 
-  const filterOptions = (options: WidgetOption[]) =>
-    options.filter((option) => {
-      if (option.requiresWidget) return boardWidgets.includes(option.requiresWidget);
-      return true;
-    });
+  const filterOptions = (options: WidgetOption[]) => options;
 
   const handleApplyCity = () => {
     if (cityInput.trim()) {

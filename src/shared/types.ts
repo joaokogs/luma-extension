@@ -3,7 +3,7 @@
  * Keep this file dependency-free so it can be imported anywhere.
  */
 
-export type WidgetType = 'links' | 'calendar' | 'pomodoro' | 'clock' | 'weather' | 'focus' | 'todo';
+export type WidgetType = 'links' | 'calendar' | 'clock' | 'weather' | 'todo';
 
 export interface LinkItem {
   id: string;
@@ -32,10 +32,6 @@ export interface CalendarWidget extends BaseWidget {
   type: 'calendar';
 }
 
-export interface PomodoroWidget extends BaseWidget {
-  type: 'pomodoro';
-}
-
 export interface ClockWidget extends BaseWidget {
   type: 'clock';
   timezone?: string;
@@ -58,12 +54,7 @@ export interface TodoWidget extends BaseWidget {
   items: TodoItem[];
 }
 
-export interface FocusWidget extends BaseWidget {
-  type: 'focus';
-  targetMinutes?: number;
-}
-
-export type Widget = LinksWidget | CalendarWidget | PomodoroWidget | ClockWidget | WeatherWidget | FocusWidget | TodoWidget;
+export type Widget = LinksWidget | CalendarWidget | ClockWidget | WeatherWidget | TodoWidget;
 
 export interface Board {
   id: string;
@@ -114,7 +105,7 @@ export interface WallpaperSetting {
   value: string;
 }
 
-export type TopWidgetType = 'clock' | 'weather' | 'focus' | 'search';
+export type TopWidgetType = 'clock' | 'weather' | 'search';
 
 export type SearchEngine = 'google' | 'yahoo' | 'bing' | 'duckduckgo';
 
@@ -130,7 +121,6 @@ export interface TopWidgetConfig {
   city?: string;
   timezone?: string;
   label?: string;
-  targetMinutes?: number;
   searchEngine?: SearchEngine;
 }
 
@@ -167,8 +157,7 @@ export const INITIAL_SAMPLE_BOARDS: Board[] = [
       { id: generateId('widget'), type: 'links', title: 'Work', colSpan: 1, order: 0, col: 0, items: [] },
       { id: generateId('widget'), type: 'links', title: 'Social', colSpan: 1, order: 0, col: 1, items: [] },
       { id: generateId('widget'), type: 'links', title: 'Learn', colSpan: 1, order: 0, col: 2, items: [] },
-      { id: generateId('widget'), type: 'calendar', title: 'Calendar', colSpan: 1, order: 0, col: 3 },
-      { id: generateId('widget'), type: 'pomodoro', title: 'Pomodoro', colSpan: 1, order: 1, col: 3 }
+      { id: generateId('widget'), type: 'calendar', title: 'Calendar', colSpan: 1, order: 0, col: 3 }
     ]
   },
   {
@@ -203,7 +192,6 @@ export function getDefaultData(): AppData {
       wallpaper: DEFAULT_WALLPAPERS[0],
       topWidgets: [
         { type: 'weather', city: 'New York' },
-        { type: 'focus', targetMinutes: 240 },
         { type: 'clock' }
       ],
       editMode: true,

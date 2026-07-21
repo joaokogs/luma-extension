@@ -3,10 +3,8 @@ import type { Widget } from '@shared/types';
 import { WidgetCard } from './WidgetCard';
 import { LinksWidgetView } from './LinksWidget';
 import { CalendarWidgetView } from './CalendarWidget';
-import { PomodoroWidgetView } from './PomodoroWidget';
 import { ClockWidgetView } from './ClockWidget';
 import { WeatherWidgetView } from './WeatherWidget';
-import { FocusWidgetView } from './FocusWidget';
 import { TodoWidgetView } from './TodoWidget';
 import { useColumnCount } from '../hooks/useColumnCount';
 
@@ -343,14 +341,10 @@ function WidgetContent({
       );
     case 'calendar':
       return <CalendarWidgetView />;
-    case 'pomodoro':
-      return <PomodoroWidgetView />;
     case 'clock':
       return <ClockWidgetView timezone={widget.timezone} label={widget.label} />;
     case 'weather':
       return <WeatherWidgetView city={widget.city} />;
-    case 'focus':
-      return <FocusWidgetView targetMinutes={widget.targetMinutes} />;
     case 'todo':
       return (
         <TodoWidgetView

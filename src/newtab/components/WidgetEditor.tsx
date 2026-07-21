@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { Widget, WidgetType } from '@shared/types';
 import { createWidget } from '@shared/storage';
-import { X, ExternalLink, LayoutGrid, Clock, CloudSun, Target, CheckSquare } from 'lucide-preact';
+import { X, ExternalLink, LayoutGrid, Clock, CloudSun, CheckSquare } from 'lucide-preact';
 import type { LucideIcon } from 'lucide-preact';
 import { CityAutocomplete } from './CityAutocomplete';
 
 const WIDGET_TYPES: { type: WidgetType; label: string; icon: LucideIcon }[] = [
   { type: 'links', label: 'Links', icon: ExternalLink },
   { type: 'calendar', label: 'Calendário', icon: LayoutGrid },
-  { type: 'pomodoro', label: 'Pomodoro', icon: Clock },
   { type: 'clock', label: 'Relógio', icon: Clock },
   { type: 'weather', label: 'Clima', icon: CloudSun },
-  { type: 'focus', label: 'Foco Hoje', icon: Target },
   { type: 'todo', label: 'Bloco de Notas', icon: CheckSquare }
 ];
 
@@ -33,9 +31,6 @@ export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onS
   const [city, setCity] = useState((widget?.type === 'weather' && widget.city) || '');
   const [timezone, setTimezone] = useState((widget?.type === 'clock' && widget.timezone) || '');
   const [label, setLabel] = useState((widget?.type === 'clock' && widget.label) || '');
-  const [targetMinutes, setTargetMinutes] = useState(
-    widget?.type === 'focus' ? widget.targetMinutes || 240 : 240
-  );
 
   useEffect(() => {
     if (type !== 'weather') return;
@@ -76,9 +71,6 @@ export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onS
     if (updated.type === 'clock') {
       (updated as typeof updated & { timezone?: string; label?: string }).timezone = timezone.trim() || undefined;
       (updated as typeof updated & { timezone?: string; label?: string }).label = label.trim() || undefined;
-    }
-    if (updated.type === 'focus') {
-      (updated as typeof updated & { targetMinutes: number }).targetMinutes = Number(targetMinutes) || 240;
     }
     onSave(updated);
   };
@@ -195,18 +187,6 @@ export function WidgetEditor({ widget, initialColumn = 0, linksOnly = false, onS
                 />
               </label>
             </div>
-          )}
-
-          {type === 'focus' && (
-            <label className="widget-editor__field">
-              <span>Meta de foco (minutos)</span>
-              <input
-                type="number"
-                value={targetMinutes}
-                onChange={(e) => setTargetMinutes(Number((e.target as HTMLInputElement).value))}
-                min={1}
-              />
-            </label>
           )}
 
         </div>

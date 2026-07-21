@@ -173,14 +173,10 @@ export function createWidget(type: WidgetType, title: string): Widget {
       return { ...base, type: 'links', items: [] };
     case 'calendar':
       return { ...base, type: 'calendar' };
-    case 'pomodoro':
-      return { ...base, type: 'pomodoro' };
     case 'clock':
       return { ...base, type: 'clock' };
     case 'weather':
       return { ...base, type: 'weather', city: 'New York' };
-    case 'focus':
-      return { ...base, type: 'focus', targetMinutes: 240 };
     case 'todo':
       return { ...base, type: 'todo', items: [] };
   }
@@ -192,14 +188,10 @@ function defaultWidgetTitle(type: WidgetType): string {
       return 'Links';
     case 'calendar':
       return 'Calendar';
-    case 'pomodoro':
-      return 'Pomodoro';
     case 'clock':
       return 'Clock';
     case 'weather':
       return 'Weather';
-    case 'focus':
-      return 'Focus Today';
     case 'todo':
       return 'Bloco de Notas';
   }
