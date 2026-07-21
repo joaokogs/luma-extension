@@ -46,7 +46,7 @@ import { ConfirmDialog } from './components/ConfirmDialog';
 import { NewTabDialog } from './components/NewTabDialog';
 
 import { SearchBar } from './components/SearchBar';
-import { useThemeStore } from './store/useThemeStore';
+import { useThemeStore, type ThemeState } from './store/useThemeStore';
 import { computeThemeVariables } from '@shared/colorExtractor';
 import './styles.css';
 
@@ -106,9 +106,9 @@ export function App() {
     }
   }, [activeBoardId]);
 
-  const themeConfig = useThemeStore((s) => s.themeConfig);
-  const themeMode = useThemeStore((s) => s.themeMode);
-  const setThemeMode = useThemeStore((s) => s.setThemeMode);
+  const themeConfig = useThemeStore((s: ThemeState) => s.themeConfig);
+  const themeMode = useThemeStore((s: ThemeState) => s.themeMode);
+  const setThemeMode = useThemeStore((s: ThemeState) => s.setThemeMode);
 
   useEffect(() => {
     if (data?.settings.theme && data.settings.theme !== themeMode) {

@@ -4,7 +4,7 @@ import type { ThemeConfig, WallpaperSetting } from '@shared/types';
 import { DEFAULT_THEME } from '@shared/types';
 import { extractColorsFromWallpaper } from '@shared/colorExtractor';
 
-interface ThemeState {
+export interface ThemeState {
   themeMode: 'light' | 'dark' | 'system';
   themeConfig: ThemeConfig;
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
