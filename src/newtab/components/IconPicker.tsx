@@ -1,6 +1,5 @@
 import { useState } from 'preact/hooks';
-import { ICON_PICKER_LIST, getLucideIcon } from './AnyIcon';
-
+import { ICON_PICKER_LIST, getLucideIcon, getFaIconDef } from './AnyIcon';
 
 interface IconPickerProps {
   selected?: string | null;
@@ -15,8 +14,6 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
     ? ICON_PICKER_LIST.filter((i) => i.label.toLowerCase().includes(query.toLowerCase()))
     : ICON_PICKER_LIST;
 
-  const SelectedIcon = selected ? getLucideIcon(selected) : null;
-
   return (
     <div className="icon-picker">
       <button
@@ -26,7 +23,7 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
         aria-label="Selecionar ícone"
         title="Ícone do link"
       >
-        {SelectedIcon ? <SelectedIcon size={18} strokeWidth={2} /> : <span className="icon-picker__placeholder">+</span>}
+        {selected ? <PickerIcon name={selected} size={18} /> : <span className="icon-picker__placeholder">+</span>}
       </button>
       {open && (
         <div className="icon-picker__dropdown">
@@ -39,24 +36,21 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
             autoFocus
           />
           <div className="icon-picker__grid">
-            {filtered.map((item) => {
-              const ItemIcon = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  className={`icon-picker__option ${selected === item.name ? 'icon-picker__option--active' : ''}`}
-                  onClick={() => {
-                    onSelect(item.name);
-                    setOpen(false);
-                    setQuery('');
-                  }}
-                  aria-label={item.label}
-                  title={item.label}
-                >
-                  <ItemIcon size={18} strokeWidth={2} />
-                </button>
-              );
-            })}
+            {filtered.map((item) => (
+              <button
+                key={item.name}
+                className={`icon-picker__option ${selected === item.name ? 'icon-picker__option--active' : ''}`}
+                onClick={() => {
+                  onSelect(item.name);
+                  setOpen(false);
+                  setQuery('');
+                }}
+                aria-label={item.label}
+                title={item.label}
+              >
+                <PickerIcon name={item.name} size={18} />
+              </button>
+            ))}
             <button
               className="icon-picker__option icon-picker__option--clear"
               onClick={() => {
@@ -74,4 +68,17 @@ export function IconPicker({ selected, onSelect }: IconPickerProps) {
       )}
     </div>
   );
+}
+
+function PickerIcon({ name, size }: { name: string; size: number }) {
+  if (name.startsWith('fa:') || name.startsWith('fab:') || name.startsWith('far:')) {
+    const def = getFaIconDef(name);
+    if (!def) return null;
+    const prefix = def.prefix === 'fab' ? 'fa-brands' : def.prefix === 'far' ? 'fa-regular' : 'fa-solid';
+    return <i class={`${prefix} ${def.iconName}`} style={{ fontSize: size, width: size, textAlign: 'center' }} />;
+  }
+
+  const IconComponent = getLucideIcon(name);
+  if (!IconComponent) return null;
+  return <IconComponent size={size} strokeWidth={2} />;
 }

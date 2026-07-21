@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { Popup } from './Popup';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import './styles.css';
 
 const root = document.getElementById('root');

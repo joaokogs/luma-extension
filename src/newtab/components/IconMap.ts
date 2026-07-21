@@ -40,13 +40,125 @@ const iconMap: Record<string, LucideIcon> = {
   'x-twitter': AtSign, google: Globe,
 };
 
-export const ICON_PICKER_LIST = Object.keys(iconMap).map((key) => ({
+export interface FaIconDef {
+  prefix: 'fas' | 'far' | 'fab';
+  iconName: string;
+}
+
+const faIconMap: Record<string, FaIconDef> = {
+  'fab:github': { prefix: 'fab', iconName: 'fa-github' },
+  'fab:twitter': { prefix: 'fab', iconName: 'fa-twitter' },
+  'fab:x-twitter': { prefix: 'fab', iconName: 'fa-x-twitter' },
+  'fab:youtube': { prefix: 'fab', iconName: 'fa-youtube' },
+  'fab:facebook': { prefix: 'fab', iconName: 'fa-facebook' },
+  'fab:instagram': { prefix: 'fab', iconName: 'fa-instagram' },
+  'fab:linkedin': { prefix: 'fab', iconName: 'fa-linkedin' },
+  'fab:slack': { prefix: 'fab', iconName: 'fa-slack' },
+  'fab:whatsapp': { prefix: 'fab', iconName: 'fa-whatsapp' },
+  'fab:telegram': { prefix: 'fab', iconName: 'fa-telegram' },
+  'fab:discord': { prefix: 'fab', iconName: 'fa-discord' },
+  'fab:reddit': { prefix: 'fab', iconName: 'fa-reddit' },
+  'fab:tiktok': { prefix: 'fab', iconName: 'fa-tiktok' },
+  'fab:snapchat': { prefix: 'fab', iconName: 'fa-snapchat' },
+  'fab:spotify': { prefix: 'fab', iconName: 'fa-spotify' },
+  'fab:medium': { prefix: 'fab', iconName: 'fa-medium' },
+  'fab:dev': { prefix: 'fab', iconName: 'fa-dev' },
+  'fab:stack-overflow': { prefix: 'fab', iconName: 'fa-stack-overflow' },
+  'fab:npm': { prefix: 'fab', iconName: 'fa-npm' },
+  'fab:docker': { prefix: 'fab', iconName: 'fa-docker' },
+  'fab:figma': { prefix: 'fab', iconName: 'fa-figma' },
+  'fab:pinterest': { prefix: 'fab', iconName: 'fa-pinterest' },
+  'fab:amazon': { prefix: 'fab', iconName: 'fa-amazon' },
+  'fab:apple': { prefix: 'fab', iconName: 'fa-apple' },
+  'fab:windows': { prefix: 'fab', iconName: 'fa-windows' },
+  'fab:android': { prefix: 'fab', iconName: 'fa-android' },
+  'fab:google': { prefix: 'fab', iconName: 'fa-google' },
+  'fab:twitch': { prefix: 'fab', iconName: 'fa-twitch' },
+  'fab:behance': { prefix: 'fab', iconName: 'fa-behance' },
+  'fab:dribbble': { prefix: 'fab', iconName: 'fa-dribbble' },
+  'fab:codepen': { prefix: 'fab', iconName: 'fa-codepen' },
+  'fab:gitlab': { prefix: 'fab', iconName: 'fa-gitlab' },
+  'fab:bitbucket': { prefix: 'fab', iconName: 'fa-bitbucket' },
+  'fab:trello': { prefix: 'fab', iconName: 'fa-trello' },
+  'fab:notion': { prefix: 'fab', iconName: 'fa-notion' },
+  'fab:steam': { prefix: 'fab', iconName: 'fa-steam' },
+  'fab:wordpress': { prefix: 'fab', iconName: 'fa-wordpress' },
+  'fab:js': { prefix: 'fab', iconName: 'fa-js' },
+  'fab:python': { prefix: 'fab', iconName: 'fa-python' },
+  'fab:react': { prefix: 'fab', iconName: 'fa-react' },
+  'fab:vuejs': { prefix: 'fab', iconName: 'fa-vuejs' },
+  'fab:angular': { prefix: 'fab', iconName: 'fa-angular' },
+  'fab:node': { prefix: 'fab', iconName: 'fa-node-js' },
+  'fab:sass': { prefix: 'fab', iconName: 'fa-sass' },
+  'fab:linux': { prefix: 'fab', iconName: 'fa-linux' },
+  'fab:ubuntu': { prefix: 'fab', iconName: 'fa-ubuntu' },
+  'fab:chrome': { prefix: 'fab', iconName: 'fa-chrome' },
+  'fab:firefox': { prefix: 'fab', iconName: 'fa-firefox' },
+  'fab:edge': { prefix: 'fab', iconName: 'fa-edge' },
+  'fab:safari': { prefix: 'fab', iconName: 'fa-safari' },
+  'fab:aws': { prefix: 'fab', iconName: 'fa-aws' },
+
+  'fa:star': { prefix: 'fas', iconName: 'fa-star' },
+  'fa:heart': { prefix: 'fas', iconName: 'fa-heart' },
+  'fa:bolt': { prefix: 'fas', iconName: 'fa-bolt' },
+  'fa:fire': { prefix: 'fas', iconName: 'fa-fire' },
+  'fa:crown': { prefix: 'fas', iconName: 'fa-crown' },
+  'fa:gem': { prefix: 'fas', iconName: 'fa-gem' },
+  'fa:rocket': { prefix: 'fas', iconName: 'fa-rocket' },
+  'fa:globe': { prefix: 'fas', iconName: 'fa-globe' },
+  'fa:home': { prefix: 'fas', iconName: 'fa-house' },
+  'fa:envelope': { prefix: 'fas', iconName: 'fa-envelope' },
+  'fa:phone': { prefix: 'fas', iconName: 'fa-phone' },
+  'fa:camera': { prefix: 'fas', iconName: 'fa-camera' },
+  'fa:music': { prefix: 'fas', iconName: 'fa-music' },
+  'fa:book': { prefix: 'fas', iconName: 'fa-book' },
+  'fa:code': { prefix: 'fas', iconName: 'fa-code' },
+  'fa:terminal': { prefix: 'fas', iconName: 'fa-terminal' },
+  'fa:database': { prefix: 'fas', iconName: 'fa-database' },
+  'fa:cloud': { prefix: 'fas', iconName: 'fa-cloud' },
+  'fa:sun': { prefix: 'fas', iconName: 'fa-sun' },
+  'fa:moon': { prefix: 'fas', iconName: 'fa-moon' },
+  'fa:bell': { prefix: 'fas', iconName: 'fa-bell' },
+  'fa:flag': { prefix: 'fas', iconName: 'fa-flag' },
+  'fa:tag': { prefix: 'fas', iconName: 'fa-tag' },
+  'fa:compass': { prefix: 'fas', iconName: 'fa-compass' },
+  'fa:clock': { prefix: 'fas', iconName: 'fa-clock' },
+  'fa:calendar': { prefix: 'fas', iconName: 'fa-calendar' },
+  'fa:user': { prefix: 'fas', iconName: 'fa-user' },
+  'fa:cog': { prefix: 'fas', iconName: 'fa-cog' },
+  'fa:lock': { prefix: 'fas', iconName: 'fa-lock' },
+  'fa:key': { prefix: 'fas', iconName: 'fa-key' },
+  'fa:pencil': { prefix: 'fas', iconName: 'fa-pencil' },
+  'fa:search': { prefix: 'fas', iconName: 'fa-magnifying-glass' },
+  'fa:download': { prefix: 'fas', iconName: 'fa-download' },
+  'fa:upload': { prefix: 'fas', iconName: 'fa-upload' },
+  'fa:share': { prefix: 'fas', iconName: 'fa-share' },
+  'fa:link': { prefix: 'fas', iconName: 'fa-link' },
+  'fa:folder': { prefix: 'fas', iconName: 'fa-folder' },
+  'fa:file': { prefix: 'fas', iconName: 'fa-file' },
+  'fa:image': { prefix: 'fas', iconName: 'fa-image' },
+  'fa:palette': { prefix: 'fas', iconName: 'fa-palette' },
+  'fa:list': { prefix: 'fas', iconName: 'fa-list' },
+};
+
+const lucidePickerList = Object.keys(iconMap).map((key) => ({
   name: key,
-  label: key,
-  icon: iconMap[key],
+  label: key.replace(/-/g, ' '),
+  source: 'lucide' as const,
 }));
 
+const faPickerList = Object.keys(faIconMap).map((key) => ({
+  name: key,
+  label: key.replace(/^(fa:|fab:|far:)/, '').replace(/-/g, ' '),
+  source: 'fa' as const,
+}));
+
+export const ICON_PICKER_LIST = [...lucidePickerList, ...faPickerList];
+
 export function getLucideIcon(name: string): LucideIcon | undefined {
-  const def = name.startsWith('fa:') ? name.slice(3) : name;
-  return iconMap[def];
+  return iconMap[name];
+}
+
+export function getFaIconDef(name: string): FaIconDef | undefined {
+  return faIconMap[name];
 }
