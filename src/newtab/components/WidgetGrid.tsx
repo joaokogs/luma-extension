@@ -5,7 +5,7 @@ import { LinksWidgetView } from './LinksWidget';
 import { CalendarWidgetView } from './CalendarWidget';
 import { ClockWidgetView } from './ClockWidget';
 import { WeatherWidgetView } from './WeatherWidget';
-import { TodoWidgetView } from './TodoWidget';
+import { TodoWidgetView, type TodoDragState } from './TodoWidget';
 import { useColumnCount } from '../hooks/useColumnCount';
 
 interface WidgetGridProps {
@@ -24,6 +24,7 @@ interface WidgetGridProps {
   onToggleTodo?: (widgetId: string, todoId: string) => void;
   onUpdateTodo?: (widgetId: string, todoId: string, text: string) => void;
   onDeleteTodo?: (widgetId: string, todoId: string) => void;
+  onMoveTodo?: (fromWidgetId: string, toWidgetId: string, todoId: string, toIndex: number) => void;
   isEditing?: boolean;
 }
 
@@ -55,12 +56,14 @@ export function WidgetGrid({
   onToggleTodo,
   onUpdateTodo,
   onDeleteTodo,
+  onMoveTodo,
   isEditing = true
 }: WidgetGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const columnCount = useColumnCount(gridRef);
   const [drag, setDrag] = useState<DragTarget>({ widgetId: null, col: null, targetId: null, position: null });
   const [linkDrag, setLinkDrag] = useState<LinkDragState>({ linkId: null, fromWidgetId: null });
+  const [todoDrag, setTodoDrag] = useState<TodoDragState>({ todoId: null, fromWidgetId: null });
 
   const columns = useMemo(() => {
     const cols: Widget[][] = Array.from({ length: columnCount }, () => []);
@@ -232,6 +235,46 @@ export function WidgetGrid({
     setLinkDrag({ linkId: null, fromWidgetId: null });
   };
 
+  const handleTodoDragStart = (e: DragEvent, todoId: string, widgetId: string) => {
+    e.dataTransfer?.setData('text/plain', JSON.stringify({ todoId, widgetId }));
+    e.dataTransfer?.setDragImage(new Image(), 0, 0);
+    setTodoDrag({ todoId, fromWidgetId: widgetId });
+  };
+
+  const handleTodoDragEnd = () => {
+    setTodoDrag({ todoId: null, fromWidgetId: null });
+  };
+
+  const handleTodoDrop = (targetWidgetId: string, targetTodoId: string | null, position: 'before' | 'after') => {
+    if (!todoDrag.todoId || !todoDrag.fromWidgetId) {
+      setTodoDrag({ todoId: null, fromWidgetId: null });
+      return;
+    }
+
+    if (!onMoveTodo) {
+      setTodoDrag({ todoId: null, fromWidgetId: null });
+      return;
+    }
+
+    const targetWidget = widgets.find((w) => w.id === targetWidgetId);
+    if (!targetWidget || targetWidget.type !== 'todo') {
+      setTodoDrag({ todoId: null, fromWidgetId: null });
+      return;
+    }
+
+    const targetItems = targetWidget.items;
+    let toIndex: number;
+    if (targetTodoId) {
+      const idx = targetItems.findIndex((t) => t.id === targetTodoId);
+      toIndex = position === 'after' ? idx + 1 : idx;
+    } else {
+      toIndex = position === 'after' ? targetItems.length : 0;
+    }
+
+    onMoveTodo(todoDrag.fromWidgetId, targetWidgetId, todoDrag.todoId, toIndex);
+    setTodoDrag({ todoId: null, fromWidgetId: null });
+  };
+
   return (
     <div className="widgets-grid" ref={gridRef}>
       {columns.map((colWidgets, colIndex) => (
@@ -262,6 +305,7 @@ export function WidgetGrid({
                   <WidgetContent
                     widget={widget}
                     linkDrag={linkDrag}
+                    todoDrag={todoDrag}
                     openInNewTab={openInNewTab}
                     onDeleteLink={isEditing ? (linkId) => onDeleteLink(widget.id, linkId) : undefined}
                     onEditLink={isEditing && onEditLink ? (linkId) => onEditLink(widget.id, linkId) : undefined}
@@ -272,6 +316,9 @@ export function WidgetGrid({
                     onToggleTodo={onToggleTodo}
                     onUpdateTodo={onUpdateTodo}
                     onDeleteTodo={onDeleteTodo}
+                    onTodoDragStart={isEditing ? (e, todoId) => handleTodoDragStart(e, todoId, widget.id) : undefined}
+                    onTodoDragEnd={isEditing ? handleTodoDragEnd : undefined}
+                    onTodoDrop={isEditing ? (widgetId, targetTodoId, position) => handleTodoDrop(widgetId, targetTodoId, position) : undefined}
                   />
                 </WidgetCard>
                 {isTarget && drag.position === 'after' && <DropIndicator />}
@@ -310,10 +357,15 @@ function WidgetContent({
   onAddTodo,
   onToggleTodo,
   onUpdateTodo,
-  onDeleteTodo
+  onDeleteTodo,
+  todoDrag,
+  onTodoDragStart,
+  onTodoDragEnd,
+  onTodoDrop
 }: {
   widget: Widget;
   linkDrag: LinkDragState;
+  todoDrag: TodoDragState;
   openInNewTab: boolean;
   onDeleteLink?: (linkId: string) => void;
   onEditLink?: (linkId: string) => void;
@@ -324,6 +376,9 @@ function WidgetContent({
   onToggleTodo?: (widgetId: string, todoId: string) => void;
   onUpdateTodo?: (widgetId: string, todoId: string, text: string) => void;
   onDeleteTodo?: (widgetId: string, todoId: string) => void;
+  onTodoDragStart?: (e: DragEvent, todoId: string, widgetId: string) => void;
+  onTodoDragEnd?: () => void;
+  onTodoDrop?: (widgetId: string, targetTodoId: string | null, position: 'before' | 'after') => void;
 }) {
   switch (widget.type) {
     case 'links':
@@ -349,10 +404,14 @@ function WidgetContent({
       return (
         <TodoWidgetView
           widget={widget}
+          todoDrag={todoDrag}
           onAddTodo={onAddTodo ? (text) => onAddTodo(widget.id, text) : undefined}
           onToggleTodo={onToggleTodo ? (todoId) => onToggleTodo(widget.id, todoId) : undefined}
           onUpdateTodo={onUpdateTodo ? (todoId, text) => onUpdateTodo(widget.id, todoId, text) : undefined}
           onDeleteTodo={onDeleteTodo ? (todoId) => onDeleteTodo(widget.id, todoId) : undefined}
+          onTodoDragStart={onTodoDragStart ? (e, todoId) => onTodoDragStart(e, todoId, widget.id) : undefined}
+          onTodoDragEnd={onTodoDragEnd}
+          onTodoDrop={onTodoDrop ? (targetTodoId, position) => onTodoDrop(widget.id, targetTodoId, position) : undefined}
         />
       );
     default:

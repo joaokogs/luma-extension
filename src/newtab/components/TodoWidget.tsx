@@ -1,27 +1,47 @@
-import { useState, useRef, useEffect } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { TodoItem, TodoWidget } from '@shared/types';
-import { Check, Plus, Pencil, Trash2, X } from 'lucide-preact';
+import { Check, Plus, Pencil, Trash2, X, GripVertical } from 'lucide-preact';
+
+export interface TodoDragState {
+  todoId: string | null;
+  fromWidgetId: string | null;
+}
+
+interface DropTarget {
+  todoId: string | null;
+  position: 'before' | 'after';
+}
 
 interface TodoWidgetViewProps {
   widget: TodoWidget;
+  todoDrag?: TodoDragState;
   onAddTodo?: (text: string) => void;
   onToggleTodo?: (todoId: string) => void;
   onUpdateTodo?: (todoId: string, text: string) => void;
   onDeleteTodo?: (todoId: string) => void;
+  onTodoDragStart?: (e: DragEvent, todoId: string) => void;
+  onTodoDragEnd?: () => void;
+  onTodoDrop?: (targetTodoId: string | null, position: 'before' | 'after') => void;
 }
 
 export function TodoWidgetView({
   widget,
+  todoDrag,
   onAddTodo,
   onToggleTodo,
   onUpdateTodo,
-  onDeleteTodo
+  onDeleteTodo,
+  onTodoDragStart,
+  onTodoDragEnd,
+  onTodoDrop
 }: TodoWidgetViewProps) {
   const [newText, setNewText] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (editingId && editInputRef.current) {
@@ -29,6 +49,12 @@ export function TodoWidgetView({
       editInputRef.current.select();
     }
   }, [editingId]);
+
+  useEffect(() => {
+    if (!todoDrag?.todoId) {
+      setDropTarget(null);
+    }
+  }, [todoDrag?.todoId]);
 
   const handleAdd = () => {
     const text = newText.trim();
@@ -67,6 +93,72 @@ export function TodoWidgetView({
     setEditingId(null);
   };
 
+  const getDropPosition = (clientY: number): DropTarget | null => {
+    if (!listRef.current) return null;
+    const items = listRef.current.querySelectorAll<HTMLLIElement>('.todo-widget__item');
+
+    if (items.length === 0) {
+      return { todoId: null, position: 'before' };
+    }
+
+    const firstRect = items[0].getBoundingClientRect();
+    if (clientY <= firstRect.top) {
+      return { todoId: items[0].dataset.todoId || null, position: 'before' };
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const rect = items[i].getBoundingClientRect();
+      const nextTop = i < items.length - 1 ? items[i + 1].getBoundingClientRect().top : rect.bottom + 20;
+
+      if (clientY >= rect.top && clientY < nextTop) {
+        const todoId = items[i].dataset.todoId;
+        if (!todoId) continue;
+        const midY = rect.top + rect.height / 2;
+        return { todoId, position: clientY < midY ? 'before' : 'after' };
+      }
+    }
+
+    const last = items[items.length - 1];
+    return { todoId: last.dataset.todoId || null, position: 'after' };
+  };
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    if (!todoDrag?.todoId) return;
+    const pos = getDropPosition(e.clientY);
+    if (pos) setDropTarget(pos);
+  };
+
+  const handleDragLeave = (e: DragEvent) => {
+    if (listRef.current && !listRef.current.contains(e.relatedTarget as Node)) {
+      setDropTarget(null);
+    }
+  };
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!onTodoDrop || !todoDrag?.todoId) {
+      setDropTarget(null);
+      return;
+    }
+    const pos = getDropPosition(e.clientY);
+    if (pos) {
+      onTodoDrop(pos.todoId, pos.position);
+    }
+    setDropTarget(null);
+  };
+
+  const getItemDropClasses = (todoId: string): string => {
+    if (!dropTarget || !todoDrag?.todoId) return 'todo-widget__item';
+    const classes = ['todo-widget__item'];
+    if (dropTarget.todoId === todoId) {
+      if (dropTarget.position === 'before') classes.push('todo-widget__item--drop-before');
+      if (dropTarget.position === 'after') classes.push('todo-widget__item--drop-after');
+    }
+    return classes.join(' ');
+  };
+
   const completedCount = widget.items.filter((t) => t.done).length;
 
   return (
@@ -96,12 +188,29 @@ export function TodoWidgetView({
         </div>
       )}
 
-      <ul className="todo-widget__list">
+      <ul
+        ref={listRef}
+        className="todo-widget__list"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {widget.items.length === 0 && todoDrag?.todoId && dropTarget && dropTarget.todoId === null && (
+          <li className="todo-widget__drop-into" />
+        )}
         {widget.items.map((todo) => (
           <li
             key={todo.id}
-            className={`todo-widget__item ${todo.done ? 'todo-widget__item--done' : ''}`}
+            data-todo-id={todo.id}
+            className={`${getItemDropClasses(todo.id)} ${todo.done ? 'todo-widget__item--done' : ''}${todoDrag?.todoId === todo.id ? ' todo-widget__item--dragging' : ''}`}
+            draggable={!!onTodoDragStart && editingId !== todo.id}
+            onDragStart={(e) => onTodoDragStart?.(e, todo.id)}
+            onDragEnd={() => onTodoDragEnd?.()}
           >
+            <span className="todo-widget__drag-handle" aria-hidden="true">
+              <GripVertical size={12} />
+            </span>
+
             <button
               className="todo-widget__checkbox"
               onClick={() => onToggleTodo?.(todo.id)}

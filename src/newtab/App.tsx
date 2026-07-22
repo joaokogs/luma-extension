@@ -23,6 +23,7 @@ import {
   deleteTodoItem,
   updateTodoItem,
   toggleTodoItem,
+  moveTodoItem,
   updateSettings,
   getBoardById,
   getInitialBoardId,
@@ -359,6 +360,11 @@ export function App() {
     setData((prev) => (prev && activeBoardId ? deleteTodoItem(prev, activeBoardId, widgetId, todoId) : prev));
   };
 
+  const handleMoveTodo = (fromWidgetId: string, toWidgetId: string, todoId: string, toIndex: number) => {
+    if (!activeBoardId) return;
+    setData((prev) => (prev && activeBoardId ? moveTodoItem(prev, activeBoardId, fromWidgetId, toWidgetId, todoId, toIndex) : prev));
+  };
+
   const editingLinkData = useMemo(() => {
     if (!editingLink || !data || !activeBoardId) return null;
     const widget = data.boards
@@ -563,6 +569,7 @@ export function App() {
             onToggleTodo={handleToggleTodo}
             onUpdateTodo={handleUpdateTodo}
             onDeleteTodo={handleDeleteTodo}
+            onMoveTodo={handleMoveTodo}
             isEditing={editModeEnabled && !searchQuery.trim()}
           />
         )}

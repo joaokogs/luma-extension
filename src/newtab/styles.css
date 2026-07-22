@@ -1472,6 +1472,49 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.todo-widget__item--dragging {
+  opacity: 0.4;
+}
+
+.todo-widget__item--drop-before {
+  border-top: 2px solid var(--accent);
+  margin-top: -1px;
+}
+
+.todo-widget__item--drop-after {
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: -1px;
+}
+
+.todo-widget__drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 100%;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  cursor: grab;
+  touch-action: none;
+}
+
+.todo-widget__item:hover .todo-widget__drag-handle {
+  opacity: 1;
+}
+
+.todo-widget__drag-handle:active {
+  cursor: grabbing;
+}
+
+.todo-widget__drop-into {
+  height: 40px;
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-sm);
+  margin: 4px 0;
+}
+
 /* Calendar widget */
 .calendar-widget {
   width: 100%;
