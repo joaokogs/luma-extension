@@ -5,7 +5,7 @@ import type { LinkItem, SearchEngine } from '@shared/types';
 
 type DropdownItem =
   | { type: 'link'; text: string; link: LinkItem }
-  | { type: 'suggestion' | 'recent'; text: string };
+  | { type: 'search' | 'suggestion' | 'recent'; text: string };
 
 interface SearchBarProps {
   searchQuery: string;
@@ -31,12 +31,33 @@ export function SearchBar({
   onRemoveRecentSearch,
 }: SearchBarProps) {
   const [open, setOpen] = useState(false);
-  const [highlighted, setHighlighted] = useState(0);
+  const [highlighted, setHighlighted] = useState(-1);
   const [engineDropdownOpen, setEngineDropdownOpen] = useState(false);
   const [webSuggestions, setWebSuggestions] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let count = 0;
+    const focus = () => {
+      if (document.activeElement !== inputRef.current) {
+        inputRef.current?.focus();
+      }
+    };
+    focus();
+    const id = setInterval(() => {
+      if (document.activeElement === inputRef.current || count >= 50) {
+        clearInterval(id);
+        return;
+      }
+      focus();
+      count++;
+    }, 100);
+    const onShow = () => focus();
+    window.addEventListener('pageshow', onShow);
+    return () => { clearInterval(id); window.removeEventListener('pageshow', onShow); };
+  }, []);
 
   const currentEngine = SEARCH_ENGINES.find((e) => e.id === searchEngine);
 
@@ -76,6 +97,7 @@ export function SearchBar({
 
     if (searchQuery.trim()) {
       return [
+        { type: 'search' as const, text: searchQuery.trim() },
         ...links,
         ...webSuggestions.slice(0, 5).map((text) => ({ type: 'suggestion' as const, text })),
       ];
@@ -99,7 +121,7 @@ export function SearchBar({
   }, [open, engineDropdownOpen]);
 
   useEffect(() => {
-    setHighlighted(0);
+    setHighlighted(-1);
   }, [dropdownItems.length]);
 
   useEffect(() => {
@@ -132,18 +154,20 @@ export function SearchBar({
     if (hasDropdown) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setHighlighted((i) => (i + 1) % dropdownItems.length);
+        setHighlighted((i) => (i < dropdownItems.length - 1 ? i + 1 : 0));
         return;
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setHighlighted((i) => (i - 1 + dropdownItems.length) % dropdownItems.length);
+        setHighlighted((i) => (i > 0 ? i - 1 : dropdownItems.length - 1));
         return;
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        const item = dropdownItems[highlighted];
-        if (item) {
-          handleSelect(item);
-          return;
+        if (highlighted >= 0) {
+          const item = dropdownItems[highlighted];
+          if (item) {
+            handleSelect(item);
+            return;
+          }
         }
       } else if (e.key === 'Escape') {
         setOpen(false);
@@ -180,8 +204,9 @@ export function SearchBar({
         value={searchQuery}
         onInput={(e) => handleInput((e.target as HTMLInputElement).value)}
         onKeyDown={handleKeyDown}
-        onFocus={() => setOpen(true)}
+        onFocus={() => { if (searchQuery.trim()) setOpen(true); }}
         autoComplete="off"
+        autoFocus
         aria-autocomplete="list"
         aria-expanded={hasDropdown}
         aria-label="Pesquisar ou digitar URL"
@@ -217,7 +242,7 @@ export function SearchBar({
             <>
               {(index === 0 || item.type !== dropdownItems[index - 1]?.type) && (
                 <li className={`search-suggestions__section ${item.type === 'link' ? 'search-suggestions__section--links' : ''}`} role="presentation">
-                  {item.type === 'link' ? 'Links' : item.type === 'suggestion' ? 'Recomendados da web' : 'Buscas recentes'}
+                  {item.type === 'search' ? 'Pesquisar' : item.type === 'link' ? 'Links' : item.type === 'suggestion' ? 'Recomendados da web' : 'Buscas recentes'}
                 </li>
               )}
               <li
@@ -228,7 +253,8 @@ export function SearchBar({
                 role="option"
                 aria-selected={index === highlighted}
               >
-                {item.type === 'link' ? <Bookmark size={14} strokeWidth={2} className="search-suggestions__icon" />
+                {item.type === 'search' ? <Search size={14} strokeWidth={2} className="search-suggestions__icon" />
+                  : item.type === 'link' ? <Bookmark size={14} strokeWidth={2} className="search-suggestions__icon" />
                   : item.type === 'recent' ? <Clock size={14} strokeWidth={2} className="search-suggestions__icon" />
                   : <Globe size={14} strokeWidth={2} className="search-suggestions__icon" />}
                 <span className="search-suggestions__text">{item.text}</span>

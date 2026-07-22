@@ -547,8 +547,8 @@ body {
 
 .search-suggestions__item:hover,
 .search-suggestions__item--highlighted {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent);
 }
 
 .search-suggestions__remove {
