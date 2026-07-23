@@ -1,6 +1,6 @@
-# Luma
+# Luma Dashboard
 
-Luma — uma extensão Firefox que substitui a nova aba por uma dashboard visual, rápida e elegante para organizar links em boards.
+Luma Dashboard — extensão Firefox que substitui a nova aba por uma dashboard visual, rápida e elegante com boards, widgets, clima, calendário e notas.
 
 ## Stack
 

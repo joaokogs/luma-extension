@@ -1,7 +1,7 @@
 {
-  "name": "luma",
-  "version": "1.0.0",
-  "description": "Luma — uma nova aba bonita e rápida para Firefox com boards visuais para organizar links, abas e notas.",
+  "name": "luma-dashboard",
+  "version": "1.1.0",
+  "description": "Luma Dashboard — nova aba bonita e rápida para Firefox com boards visuais para organizar links, abas e notas.",
   "type": "module",
   "scripts": {
     "dev": "vite",
